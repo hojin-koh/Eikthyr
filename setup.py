@@ -20,8 +20,7 @@ setuptools.setup(
         "License :: OSI Approved :: Apache License",
         "Operating System :: OS Independent",
     ],
-    package_dir={"": "src"},
-    packages=setuptools.find_packages(where="src"),
+    packages=['Eikthyr'],
     python_requires=">=3.8",
-    install_requires=["luigi==3.0.3"],
+    install_requires=["luigi"],
 )
