@@ -22,5 +22,5 @@ setuptools.setup(
     ],
     packages=['Eikthyr'],
     python_requires=">=3.8",
-    install_requires=["luigi"],
+    install_requires=["luigi", "plumbum"],
 )
