@@ -5,14 +5,27 @@ from hashlib import md5
 import pickle
 import json
 
+from luigi.local_target import LocalFileSystem
+from luigi.task import flatten
+
 metadir = "meta"
 
+class LocalOverwriteFileSystem(LocalFileSystem):
+    def rename_dont_move(self, path, dest):
+        self.move(path, dest, raise_if_exists=False)
+
 class MetaTarget(lg.LocalTarget):
+    fs = LocalOverwriteFileSystem()
 
     def __init__(self, task, path):
         super().__init__(path)
         self.task = task
         self.metapath = Path(metadir) / "{}.json".format(self.path)
+
+        self.objMeta = None
+        self.outdated = None
+        print("CONSTRUCTED {}".format(self))
+
 
     def makedirs(self):
         super().makedirs()
@@ -23,10 +36,50 @@ class MetaTarget(lg.LocalTarget):
         self.makedirs()
         with self.temporary_path() as f:
             yield f
-            objMeta = {"data": {}, "gen": {
-                "task": repr(self.task),
-                "code": md5(pickle.dumps(self.task.__class__.run, protocol=4), usedforsecurity=False).hexdigest(),
-                "out": md5(Path(f).read_bytes(), usedforsecurity=False).hexdigest(),
+            objMeta = {'data': {}, 'gen': {
+                'task': repr(self.task),
+                'code': self.task.getCodeHash(),
+                'out': md5(Path(f).read_bytes(), usedforsecurity=False).hexdigest(),
+                'src': [],
                 }}
-            with self.metapath.open('w') as fpwMeta:
-                json.dump(objMeta, fpwMeta, indent=2, sort_keys=True)
+        for tgt in flatten(self.task.input()):
+            if not isinstance(tgt, MetaTarget): continue
+            objMeta['gen']['src'].append(tgt.getMeta()['gen']['out'])
+        objMeta['gen']['src'].sort()
+        with self.metapath.open('w') as fpwMeta:
+            json.dump(objMeta, fpwMeta, indent=2, sort_keys=True)
+        self.objMeta = objMeta
+
+    def getMeta(self):
+        if self.objMeta == None:
+            with self.metapath.open() as fpMeta:
+                self.objMeta = json.load(fpMeta)
+                print('LOAD JSON {}'.format(self.metapath))
+        return self.objMeta
+
+    def isOutdated(self):
+        if not Path(self.path).exists():
+            return True
+        if not self.metapath.exists():
+            return True
+        if 'gen' not in self.getMeta():
+            return True
+        objGen = self.getMeta()['gen']
+
+        # Check hashes of this task
+        if 'task' not in objGen or repr(self.task) != objGen['task']:
+            print('TASKNAMEMISMATCH {}'.format(self.path))
+            return True
+        if 'code' not in objGen or self.task.getCodeHash() != objGen['code']:
+            print('TASKCODEMISMATCH {} {}'.format(self.path, self.task.getCodeHash()))
+            return True
+
+        # Check hashes of dependencies
+        aHashSrcCalculated = []
+        for tgt in flatten(self.task.input()):
+            if not isinstance(tgt, MetaTarget): continue
+            aHashSrcCalculated.append(tgt.getMeta()['gen']['out'])
+        if sorted(aHashSrcCalculated) != objGen['src']:
+            return True
+                
+        return False
