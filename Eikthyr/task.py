@@ -8,8 +8,9 @@ from plumbum import FG
 
 from luigi.task import flatten
 from .data import MetaTarget
+from logzero import setup_logger
 
-logger = logging.getLogger('Eikthyr')
+logger = setup_logger('Eikthyr')
 
 class Task(lg.Task):
 
@@ -23,12 +24,12 @@ class Task(lg.Task):
 
     @lg.Task.event_handler(lg.Event.START)
     def hook_start(self):
-        print("START! {}".format(self))
+        logger.debug("Start {}".format(self))
 
     @lg.Task.event_handler(lg.Event.PROCESSING_TIME)
     def hook_end(self, t):
         self.cacheComplete = None # invalidate the cache
-        print("END! {}".format(t))
+        logger.info("End {} in {:.3f}s".format(self, t))
 
     # Expected to get a plumbum object
     def ex(self, chain):
