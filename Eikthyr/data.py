@@ -23,8 +23,7 @@ class MetaTarget(lg.LocalTarget):
         self.metapath = Path(metadir) / "{}.json".format(self.path)
 
         self.objMeta = None
-        self.outdated = None
-        print("CONSTRUCTED {}".format(self))
+        self.cacheOutdated = None
 
 
     def makedirs(self):
@@ -54,7 +53,6 @@ class MetaTarget(lg.LocalTarget):
         if self.objMeta == None:
             with self.metapath.open() as fpMeta:
                 self.objMeta = json.load(fpMeta)
-                print('LOAD JSON {}'.format(self.metapath))
         return self.objMeta
 
     def isOutdated(self):
@@ -68,16 +66,16 @@ class MetaTarget(lg.LocalTarget):
 
         # Check hashes of this task
         if 'task' not in objGen or repr(self.task) != objGen['task']:
-            print('TASKNAMEMISMATCH {}'.format(self.path))
             return True
         if 'code' not in objGen or self.task.getCodeHash() != objGen['code']:
-            print('TASKCODEMISMATCH {} {}'.format(self.path, self.task.getCodeHash()))
             return True
 
         # Check hashes of dependencies
         aHashSrcCalculated = []
         for tgt in flatten(self.task.input()):
             if not isinstance(tgt, MetaTarget): continue
+            if not tgt.task.complete():
+                return True
             aHashSrcCalculated.append(tgt.getMeta()['gen']['out'])
         if sorted(aHashSrcCalculated) != objGen['src']:
             return True
