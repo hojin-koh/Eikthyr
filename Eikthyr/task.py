@@ -46,8 +46,11 @@ class Task(lg.Task):
         logger.info("EX: {}".format(chain))
         chain & FG
 
+    def getCode(self):
+        return self.__class__.run
+
     def getCodeHash(self):
-        return md5(pickle.dumps(getsource(self.__class__.run), protocol=4), usedforsecurity=False).hexdigest()
+        return md5(pickle.dumps(getsource(self.getCode()), protocol=4), usedforsecurity=False).hexdigest()
 
     def getSrcHash(self):
         return self.hashSrc

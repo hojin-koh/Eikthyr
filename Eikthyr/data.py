@@ -22,8 +22,7 @@ import json
 
 from luigi.local_target import LocalFileSystem
 from luigi.task import flatten
-
-metadir = "meta"
+from .config import metadir
 
 class LocalOverwriteFileSystem(LocalFileSystem):
     def rename_dont_move(self, path, dest):
@@ -45,6 +44,12 @@ class MetaTarget(lg.LocalTarget):
         self.makedirs()
         with self.temporary_path() as f:
             yield f
+        self.writeMeta()
+
+    @contextmanager
+    def fpWrite(self):
+        with self.open('w') as fpw:
+            yield fpw
         self.writeMeta()
 
     def writeMeta(self):
