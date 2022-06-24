@@ -52,9 +52,18 @@ class MetaTarget(lg.LocalTarget):
         objMeta = {'data': {}, 'gen': {
             'task': repr(self.task),
             'code': self.task.getCodeHash(),
-            'out': md5(Path(self.path).read_bytes(), usedforsecurity=False).hexdigest(),
             'src': [],
             }}
+
+        pathThis = Path(self.path)
+        if pathThis.is_dir():
+            h = md5()
+            for f in sorted((p for p in pathThis.glob('**/*') if p.is_file())):
+                h.update(f.read_bytes())
+            objMeta['gen']['out'] = h.hexdigest()
+        else:
+            objMeta['gen']['out'] = md5(pathThis.read_bytes(), usedforsecurity=False).hexdigest()
+
         for tgt in flatten(self.task.input()):
             if not isinstance(tgt, MetaTarget): continue
             objMeta['gen']['src'].append(tgt.getMeta()['gen']['out'])
