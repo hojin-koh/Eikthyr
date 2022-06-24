@@ -13,6 +13,15 @@
 # limitations under the License.
 
 import luigi as lg
+import time
 
-def run(tasks):
-    return lg.build(tasks, local_scheduler=True, log_level='WARNING', detailed_summary=True, workers=1)
+from logzero import setup_logger
+logger = setup_logger('Eikthyr')
+
+def run(tasks, print_summary=True):
+    t0 = time.time()
+    rtn = lg.build(tasks, local_scheduler=True, log_level='WARNING', detailed_summary=True, workers=1)
+    if print_summary:
+        logger.info("Total Time Spent: {:.3f}s".format(time.time() - t0))
+        logger.debug(rtn.summary_text)
+    return rtn
