@@ -36,6 +36,7 @@ class Task(lg.Task):
         else:
             self.objOutput = None
         self.cacheComplete = None
+        self.hashSrc = None
 
     def output(self):
         return self.objOutput;
@@ -48,9 +49,27 @@ class Task(lg.Task):
     def getCodeHash(self):
         return md5(pickle.dumps(getsource(self.__class__.run), protocol=4), usedforsecurity=False).hexdigest()
 
+    def getSrcHash(self):
+        return self.hashSrc
+
     def complete(self):
         if self.cacheComplete is not None:
             return self.cacheComplete
+
+        # Check whether the dependencies are fine
+        for tgt in flatten(self.input()):
+            if not isinstance(tgt, MetaTarget): continue
+            if not tgt.task.complete():
+                return False
+
+        # Reaching here, all inputs are completed
+        if self.hashSrc == None:
+            self.hashSrc = []
+            for tgt in flatten(self.input()):
+                if not isinstance(tgt, MetaTarget): continue
+                self.hashSrc.append(tgt.getMeta()['gen']['out'])
+            self.hashSrc.sort()
+
         outputs = flatten(self.output())
         if len(outputs) == 0:
             self.cacheComplete = False

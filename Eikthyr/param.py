@@ -30,7 +30,6 @@ class TaskParameter(lg.Parameter):
 class TargetParameter(lg.Parameter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        print(self)
 
     def _warn_on_wrong_param_type(self, param_name, param_value):
         if self.__class__ != TargetParameter:

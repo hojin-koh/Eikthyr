@@ -63,11 +63,8 @@ class MetaTarget(lg.LocalTarget):
             objMeta['gen']['out'] = h.hexdigest()
         else:
             objMeta['gen']['out'] = md5(pathThis.read_bytes(), usedforsecurity=False).hexdigest()
+        objMeta['gen']['src'] = self.task.getSrcHash()
 
-        for tgt in flatten(self.task.input()):
-            if not isinstance(tgt, MetaTarget): continue
-            objMeta['gen']['src'].append(tgt.getMeta()['gen']['out'])
-        objMeta['gen']['src'].sort()
         with self.metapath.open('w') as fpwMeta:
             json.dump(objMeta, fpwMeta, indent=2, sort_keys=True)
         self.objMeta = objMeta
@@ -94,13 +91,7 @@ class MetaTarget(lg.LocalTarget):
             return True
 
         # Check hashes of dependencies
-        aHashSrcCalculated = []
-        for tgt in flatten(self.task.input()):
-            if not isinstance(tgt, MetaTarget): continue
-            if not tgt.task.complete():
-                return True
-            aHashSrcCalculated.append(tgt.getMeta()['gen']['out'])
-        if sorted(aHashSrcCalculated) != objGen['src']:
+        if self.task.getSrcHash() != objGen['src']:
             return True
                 
         return False
