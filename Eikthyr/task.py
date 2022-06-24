@@ -20,7 +20,6 @@ from inspect import getsource
 import logging
 import time
 from plumbum import FG
-from pathlib import Path
 
 from luigi.task import flatten
 from .data import MetaTarget
@@ -78,18 +77,3 @@ def hook_start(self):
 def hook_end(self, t):
     self.cacheComplete = None # invalidate the cache
     logger.info("End {} in {:.3f}s\n".format(self, time.time() - self.timeStart))
-
-
-# Wrapper for an input file
-# TODO: folder support
-class InputTask(Task):
-    src = lg.Parameter()
-
-    def generates(self):
-        return MetaTarget(self, self.src)
-
-    def run(self):
-        if not Path(self.src).exists():
-            raise OSError(1, "Input file not found", self.src)
-        self.output().writeMeta()
-
