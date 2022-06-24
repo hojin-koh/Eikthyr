@@ -18,32 +18,28 @@ from hashlib import md5
 from inspect import getsource
 
 import logging
+import time
 from plumbum import FG
+from pathlib import Path
 
 from luigi.task import flatten
 from .data import MetaTarget
-from logzero import setup_logger
 
+from logzero import setup_logger
 logger = setup_logger('Eikthyr')
 
 class Task(lg.Task):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.objOutput = self.generates()
+        if hasattr(self, 'generates'):
+            self.objOutput = self.generates()
+        else:
+            self.objOutput = None
         self.cacheComplete = None
 
     def output(self):
         return self.objOutput;
-
-    @lg.Task.event_handler(lg.Event.START)
-    def hook_start(self):
-        logger.debug("Start {}".format(self))
-
-    @lg.Task.event_handler(lg.Event.PROCESSING_TIME)
-    def hook_end(self, t):
-        self.cacheComplete = None # invalidate the cache
-        logger.info("End {} in {:.3f}s".format(self, t))
 
     # Expected to get a plumbum object
     def ex(self, chain):
@@ -71,4 +67,29 @@ class Task(lg.Task):
                     return False
         self.cacheComplete = True
         return True
+
+@Task.event_handler(lg.Event.START)
+def hook_start(self):
+    if not hasattr(self, 'timeStart'):
+        logger.debug("Start {}".format(self))
+        self.timeStart = time.time()
+
+@Task.event_handler(lg.Event.PROCESSING_TIME)
+def hook_end(self, t):
+    self.cacheComplete = None # invalidate the cache
+    logger.info("End {} in {:.3f}s\n".format(self, time.time() - self.timeStart))
+
+
+# Wrapper for an input file
+# TODO: folder support
+class InputTask(Task):
+    src = lg.Parameter()
+
+    def generates(self):
+        return MetaTarget(self, self.src)
+
+    def run(self):
+        if not Path(self.src).exists():
+            raise OSError(1, "Input file not found", self.src)
+        self.output().writeMeta()
 

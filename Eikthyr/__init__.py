@@ -4,6 +4,7 @@ from Eikthyr.data import MetaTarget
 
 from Eikthyr import task
 from Eikthyr.task import Task
+from Eikthyr.task import InputTask
 
 from Eikthyr import param
 from Eikthyr.param import TaskParameter

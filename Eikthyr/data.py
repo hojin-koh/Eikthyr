@@ -40,22 +40,21 @@ class MetaTarget(lg.LocalTarget):
         self.objMeta = None
         self.cacheOutdated = None
 
-
-    def makedirs(self):
-        super().makedirs()
-        self.metapath.parent.mkdir(parents=True, exist_ok=True)
-
     @contextmanager
     def pathWrite(self):
         self.makedirs()
         with self.temporary_path() as f:
             yield f
-            objMeta = {'data': {}, 'gen': {
-                'task': repr(self.task),
-                'code': self.task.getCodeHash(),
-                'out': md5(Path(f).read_bytes(), usedforsecurity=False).hexdigest(),
-                'src': [],
-                }}
+        self.writeMeta()
+
+    def writeMeta(self):
+        self.metapath.parent.mkdir(parents=True, exist_ok=True)
+        objMeta = {'data': {}, 'gen': {
+            'task': repr(self.task),
+            'code': self.task.getCodeHash(),
+            'out': md5(Path(self.path).read_bytes(), usedforsecurity=False).hexdigest(),
+            'src': [],
+            }}
         for tgt in flatten(self.task.input()):
             if not isinstance(tgt, MetaTarget): continue
             objMeta['gen']['src'].append(tgt.getMeta()['gen']['out'])
