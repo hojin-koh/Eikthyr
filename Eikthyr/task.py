@@ -57,7 +57,19 @@ class Task(lg.Task):
             return "{}()".format(self.__class__.__name__)
 
     def getCode(self):
-        return self.__class__.run
+        return self.__class__.task
+
+    def run(self):
+        if not hasattr(self, 'timeStart'):
+            logger.debug("Start {}".format(self))
+            self.timeStart = time.time()
+        rtn = self.task()
+        self.cacheComplete = None # invalidate the cache
+        logger.info("End {} in {:.3f}s\n".format(self, time.time() - self.timeStart))
+        return rtn
+
+    def task(self):
+        pass
 
     def getCodeHash(self):
         if self.checkCodeHash:
@@ -87,27 +99,13 @@ class Task(lg.Task):
 
         outputs = flatten(self.output())
         if len(outputs) == 0:
-            self.cacheComplete = False
             return False
         for t in outputs:
             if isinstance(t, Target):
                 if t.isOutdated():
-                    self.cacheComplete = False
                     return False
             else:
                 if not t.exists():
-                    self.cacheComplete = False
                     return False
         self.cacheComplete = True
         return True
-
-@Task.event_handler(lg.Event.START)
-def hook_start(self):
-    if not hasattr(self, 'timeStart'):
-        logger.debug("Start {}".format(self))
-        self.timeStart = time.time()
-
-@Task.event_handler(lg.Event.PROCESSING_TIME)
-def hook_end(self, t):
-    self.cacheComplete = None # invalidate the cache
-    logger.info("End {} in {:.3f}s\n".format(self, time.time() - self.timeStart))

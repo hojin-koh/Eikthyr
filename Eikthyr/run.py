@@ -15,12 +15,22 @@
 import luigi as lg
 import time
 
+from luigi.interface import _WorkerSchedulerFactory
+from luigi import worker
+
 from logzero import setup_logger
 logger = setup_logger('Eikthyr')
 
+class _EikthyrFactory(_WorkerSchedulerFactory):
+    def create_worker(self, scheduler, worker_processes, assistant=False):
+        # Based on the suggestions in https://github.com/spotify/luigi/issues/2992
+        return worker.Worker(
+            scheduler=scheduler, worker_processes=worker_processes, assistant=assistant, check_complete_on_run=True, check_unfulfilled_deps=False)
+
 def run(tasks, print_summary=True):
     t0 = time.time()
-    rtn = lg.build(tasks, local_scheduler=True, log_level='WARNING', detailed_summary=True, workers=1)
+    rtn = lg.build(tasks, local_scheduler=True, log_level='WARNING', detailed_summary=True,
+            workers=1, worker_scheduler_factory=_EikthyrFactory())
     if print_summary:
         logger.info("Total Time Spent: {:.3f}s".format(time.time() - t0))
         logger.debug(rtn.summary_text)

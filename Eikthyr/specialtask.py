@@ -31,7 +31,7 @@ class InputTask(Task):
     def generates(self):
         return Target(self, self.src)
 
-    def run(self):
+    def task(self):
         if not Path(self.src).exists():
             raise OSError(1, "Input file not found", self.src)
         self.output().writeMeta()
@@ -68,15 +68,10 @@ class StampTask(Task):
     def getCode(self):
         return self.__class__.task
 
-    # Actual thing defined here
-    def task(self):
-        pass
-
     def run(self):
         self.cacheComplete = None # invalidate the cache
         if self.complete():
-            logger.debug("NOP since Stamp unchanged.")
             return
-        self.task()
+        super().run()
         with self.output().fpWrite() as fpw:
             pass
