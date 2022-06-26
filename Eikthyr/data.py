@@ -28,7 +28,7 @@ class LocalOverwriteFileSystem(LocalFileSystem):
     def rename_dont_move(self, path, dest):
         self.move(path, dest, raise_if_exists=False)
 
-class MetaTarget(lg.LocalTarget):
+class Target(lg.LocalTarget):
     fs = LocalOverwriteFileSystem()
 
     def __init__(self, task, path):

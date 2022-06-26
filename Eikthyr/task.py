@@ -22,12 +22,16 @@ import time
 from plumbum import FG
 
 from luigi.task import flatten
-from .data import MetaTarget
+from .data import Target
 
 from logzero import setup_logger
 logger = setup_logger('Eikthyr')
 
 class Task(lg.Task):
+    checkInputHash = True
+    checkOutputHash = True
+    checkCodeHash = True
+    checkSignature = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -61,7 +65,7 @@ class Task(lg.Task):
 
         # Check whether the dependencies are fine
         for tgt in flatten(self.input()):
-            if not isinstance(tgt, MetaTarget): continue
+            if not isinstance(tgt, Target): continue
             if not tgt.task.complete():
                 return False
 
@@ -69,7 +73,7 @@ class Task(lg.Task):
         if self.hashSrc == None:
             self.hashSrc = []
             for tgt in flatten(self.input()):
-                if not isinstance(tgt, MetaTarget): continue
+                if not isinstance(tgt, Target): continue
                 self.hashSrc.append(tgt.getMeta()['gen']['out'])
             self.hashSrc.sort()
 
@@ -78,7 +82,7 @@ class Task(lg.Task):
             self.cacheComplete = False
             return False
         for t in outputs:
-            if isinstance(t, MetaTarget):
+            if isinstance(t, Target):
                 if t.isOutdated():
                     self.cacheComplete = False
                     return False

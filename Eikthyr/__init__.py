@@ -1,7 +1,7 @@
 from Eikthyr import config
 
 from Eikthyr import data
-from Eikthyr.data import MetaTarget
+from Eikthyr.data import Target
 
 from Eikthyr import task
 from Eikthyr.task import Task

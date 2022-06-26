@@ -14,7 +14,7 @@
 
 import luigi as lg
 
-from .data import MetaTarget
+from .data import Target
 
 class TaskParameter(lg.Parameter):
     def __init__(self, *args, **kwargs):
@@ -34,5 +34,5 @@ class TargetParameter(lg.Parameter):
     def _warn_on_wrong_param_type(self, param_name, param_value):
         if self.__class__ != TargetParameter:
             return
-        if not isinstance(param_value, MetaTarget):
+        if not isinstance(param_value, Target):
             raise ValueError("parameter {} must be a Eikthyr target, got {} instead".format(param_name, param_value))

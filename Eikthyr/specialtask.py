@@ -18,7 +18,7 @@ from pathlib import Path
 from copy import copy
 
 from .task import Task
-from .data import MetaTarget
+from .data import Target
 from .param import TargetParameter
 from .config import stampdir
 
@@ -30,7 +30,7 @@ class InputTask(Task):
     src = lg.Parameter()
 
     def generates(self):
-        return MetaTarget(self, self.src)
+        return Target(self, self.src)
 
     def run(self):
         if not Path(self.src).exists():
@@ -58,7 +58,7 @@ class StampTask(Task):
 
     def generates(self):
         # Let's turn outself into a filename
-        return MetaTarget(self, Path(stampdir) / "".join(c for c in repr(self) if c.isalnum()))
+        return Target(self, Path(stampdir) / "".join(c for c in repr(self) if c.isalnum()))
 
     def getCode(self):
         return self.__class__.task
