@@ -55,20 +55,23 @@ class Target(lg.LocalTarget):
     def writeMeta(self):
         self.metapath.parent.mkdir(parents=True, exist_ok=True)
         objMeta = {'data': {}, 'gen': {
-            'task': repr(self.task),
+            'task': self.task.getSignature(),
             'code': self.task.getCodeHash(),
             'src': [],
             }}
-
-        pathThis = Path(self.path)
-        if pathThis.is_dir():
-            h = md5()
-            for f in sorted((p for p in pathThis.glob('**/*') if p.is_file())):
-                h.update(f.read_bytes())
-            objMeta['gen']['out'] = h.hexdigest()
-        else:
-            objMeta['gen']['out'] = md5(pathThis.read_bytes(), usedforsecurity=False).hexdigest()
         objMeta['gen']['src'] = self.task.getSrcHash()
+
+        if self.task.checkOutputHash:
+            pathThis = Path(self.path)
+            if pathThis.is_dir():
+                h = md5()
+                for f in sorted((p for p in pathThis.glob('**/*') if p.is_file())):
+                    h.update(f.read_bytes())
+                objMeta['gen']['out'] = h.hexdigest()
+            else:
+                objMeta['gen']['out'] = md5(pathThis.read_bytes(), usedforsecurity=False).hexdigest()
+        else:
+            objMeta['gen']['out'] = '0'
 
         with self.metapath.open('w') as fpwMeta:
             json.dump(objMeta, fpwMeta, indent=2, sort_keys=True)
@@ -90,7 +93,7 @@ class Target(lg.LocalTarget):
         objGen = self.getMeta()['gen']
 
         # Check hashes of this task
-        if 'task' not in objGen or repr(self.task) != objGen['task']:
+        if 'task' not in objGen or self.task.getSignature() != objGen['task']:
             return True
         if 'code' not in objGen or self.task.getCodeHash() != objGen['code']:
             return True

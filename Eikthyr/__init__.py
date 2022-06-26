@@ -12,7 +12,7 @@ from Eikthyr.param import TargetParameter
 
 from Eikthyr import specialtask
 from Eikthyr.specialtask import InputTask
-from Eikthyr.specialtask import TargetTask
+from Eikthyr.specialtask import TargetWrapperTask
 from Eikthyr.specialtask import StampTask
 
 from Eikthyr import run

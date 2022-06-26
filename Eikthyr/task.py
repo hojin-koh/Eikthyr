@@ -50,11 +50,20 @@ class Task(lg.Task):
         logger.info("EX: {}".format(chain))
         chain & FG
 
+    def getSignature(self):
+        if self.checkSignature:
+            return repr(self)
+        else:
+            return "{}()".format(self.__class__.__name__)
+
     def getCode(self):
         return self.__class__.run
 
     def getCodeHash(self):
-        return md5(pickle.dumps(getsource(self.getCode()), protocol=4), usedforsecurity=False).hexdigest()
+        if self.checkCodeHash:
+            return md5(pickle.dumps(getsource(self.getCode()), protocol=4), usedforsecurity=False).hexdigest()
+        else:
+            return '0'
 
     def getSrcHash(self):
         return self.hashSrc
@@ -72,10 +81,11 @@ class Task(lg.Task):
         # Reaching here, all inputs are completed
         if self.hashSrc == None:
             self.hashSrc = []
-            for tgt in flatten(self.input()):
-                if not isinstance(tgt, Target): continue
-                self.hashSrc.append(tgt.getMeta()['gen']['out'])
-            self.hashSrc.sort()
+            if self.checkInputHash:
+                for tgt in flatten(self.input()):
+                    if not isinstance(tgt, Target): continue
+                    self.hashSrc.append(tgt.getMeta()['gen']['out'])
+                self.hashSrc.sort()
 
         outputs = flatten(self.output())
         if len(outputs) == 0:

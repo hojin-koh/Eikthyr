@@ -15,7 +15,6 @@
 import luigi as lg
 
 from pathlib import Path
-from copy import copy
 
 from .task import Task
 from .data import Target
@@ -38,7 +37,7 @@ class InputTask(Task):
         self.output().writeMeta()
 
 # Wrapper for a single target
-class TargetTask(lg.Task):
+class TargetWrapperTask(lg.Task):
     src = TargetParameter()
 
     def requires(self):
@@ -53,8 +52,14 @@ class TargetTask(lg.Task):
     def complete(self):
         return self.src.task.complete()
 
-# Stamp target: if code don't change, no need to re-run
+# Stamp: if code don't change, no need to re-run
 class StampTask(Task):
+
+    # This task doesn't care about the whether the upstream sources changed
+    checkInputHash = False
+
+    # We only generate one single empty stamp file, what's the point?
+    checkOutputHash = False
 
     def generates(self):
         # Let's turn outself into a filename
@@ -63,10 +68,6 @@ class StampTask(Task):
     def getCode(self):
         return self.__class__.task
 
-    # Outputs in this task don't care about the upstream sources
-    def getSrcHash(self):
-        return copy([])
-
     # Actual thing defined here
     def task(self):
         pass
@@ -74,7 +75,7 @@ class StampTask(Task):
     def run(self):
         self.cacheComplete = None # invalidate the cache
         if self.complete():
-            logger.debug("<NOP> Stamp unchanged.")
+            logger.debug("NOP since Stamp unchanged.")
             return
         self.task()
         with self.output().fpWrite() as fpw:
