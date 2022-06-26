@@ -66,6 +66,13 @@ class Task(lg.Task):
             return '0'
 
     def getSrcHash(self):
+        if self.hashSrc == None:
+            self.hashSrc = []
+            if self.checkInputHash:
+                for tgt in flatten(self.input()):
+                    if not isinstance(tgt, Target): continue
+                    self.hashSrc.append(tgt.getMeta()['gen']['out'])
+                self.hashSrc.sort()
         return self.hashSrc
 
     def complete(self):
@@ -77,15 +84,6 @@ class Task(lg.Task):
             if not isinstance(tgt, Target): continue
             if not tgt.task.complete():
                 return False
-
-        # Reaching here, all inputs are completed
-        if self.hashSrc == None:
-            self.hashSrc = []
-            if self.checkInputHash:
-                for tgt in flatten(self.input()):
-                    if not isinstance(tgt, Target): continue
-                    self.hashSrc.append(tgt.getMeta()['gen']['out'])
-                self.hashSrc.sort()
 
         outputs = flatten(self.output())
         if len(outputs) == 0:
