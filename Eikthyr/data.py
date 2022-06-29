@@ -20,9 +20,11 @@ from hashlib import md5
 import json
 
 from luigi.local_target import LocalFileSystem
-from .config import metadir
 
 from . import cache
+
+class TargetConfig(lg.Config):
+    pathMeta = luigi.Parameter(default='meta')
 
 class LocalOverwriteFileSystem(LocalFileSystem):
     def rename_dont_move(self, path, dest):
@@ -34,7 +36,7 @@ class Target(lg.LocalTarget):
     def __init__(self, task, path):
         super().__init__(path)
         self.task = task
-        self.metapath = Path(metadir) / "{}.json".format(self.path)
+        self.metapath = Path(TargetConfig().pathMeta) / "{}.json".format(self.path)
 
         self.objMeta = None
 

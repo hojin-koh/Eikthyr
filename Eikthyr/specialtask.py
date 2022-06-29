@@ -19,7 +19,6 @@ from pathlib import Path
 from .task import Task
 from .data import Target
 from .param import TargetParameter
-from .config import stampdir
 
 from logzero import setup_logger
 logger = setup_logger('Eikthyr')
@@ -54,6 +53,7 @@ class TargetWrapperTask(lg.Task):
 
 # Stamp: if code don't change, no need to re-run
 class StampTask(Task):
+    pathStamp = lg.Parameter(default='stamp')
 
     # This task doesn't care about the whether the upstream sources changed
     checkInputHash = False
@@ -63,7 +63,7 @@ class StampTask(Task):
 
     def generates(self):
         # Let's turn outself into a filename
-        return Target(self, Path(stampdir) / "".join(c for c in repr(self) if c.isalnum()))
+        return Target(self, Path(self.pathStamp) / "".join(c for c in repr(self) if c.isalnum()))
 
     def getCode(self):
         return self.__class__.task
