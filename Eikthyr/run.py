@@ -21,6 +21,7 @@ from luigi import worker
 from logzero import setup_logger
 logger = setup_logger('Eikthyr')
 
+import os
 import atexit
 import threading
 from random import randint
@@ -39,7 +40,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         print('HANDLE GET')
         pass
 
-def run(tasks, print_summary=True):
+def startCache(tasks, print_summary=True):
     # Start the cacche server if not already
     global sock
     if sock == None:
@@ -48,7 +49,10 @@ def run(tasks, print_summary=True):
         thr.start()
         ip, port = sock.server_address
         logger.debug("Task cache server started at {}:{}".format(ip, port))
-        
+        os.environ['EIKTHYR_CACHE_IP'] = ip
+        os.environ['EIKTHYR_CACHE_PORT'] = port
+
+def run(tasks, print_summary=True):
     t0 = time.time()
     rtn = lg.build(tasks, local_scheduler=True, log_level='WARNING', detailed_summary=True,
             workers=1, worker_scheduler_factory=_EikthyrFactory())
