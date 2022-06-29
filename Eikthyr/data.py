@@ -24,9 +24,7 @@ from luigi.local_target import LocalFileSystem
 from luigi.task import flatten
 from .config import metadir
 
-import os
-from http.client import HTTPConnection
-from urllib.parse import quote_plus
+from . import cache
 
 class LocalOverwriteFileSystem(LocalFileSystem):
     def rename_dont_move(self, path, dest):
@@ -88,30 +86,17 @@ class Target(lg.LocalTarget):
             with self.metapath.open() as fpMeta:
                 objMeta = json.load(fpMeta)
 
-        if 'EIKTHYR_CACHE_IP' in os.environ:
-            try:
-                data = bytes(json.dumps(objMeta), 'utf-8')
-                h = HTTPConnection(os.environ['EIKTHYR_CACHE_IP'], int(os.environ['EIKTHYR_CACHE_PORT']))
-                h.request('PUT', '/{}'.format(quote_plus(repr(self))), body=data, headers={'Content-Length': len(data)})
-                h.getresponse()
-            finally:
-                h.close()
+        if cache.isAvailable():
+            cache.putObj(self, objMeta)
         else:
             self.objMeta = objMeta
         return objMeta
 
     def getMeta(self):
-        if 'EIKTHYR_CACHE_IP' in os.environ:
-            try:
-                h = HTTPConnection(os.environ['EIKTHYR_CACHE_IP'], int(os.environ['EIKTHYR_CACHE_PORT']))
-                h.request('GET', '/{}'.format(quote_plus(repr(self))))
-                r = h.getresponse()
-                if r.status == 200:
-                    return json.loads(r.read(int(r.headers['Content-Length'])))
-                else:
-                    return self.writeCache()
-            finally:
-                h.close()
+        if cache.isAvailable():
+            rslt = cache.getObj(self)
+            if rslt != None:
+                return rslt
         elif self.objMeta != None:
             return self.objMeta
         return self.writeCache()

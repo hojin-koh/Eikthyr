@@ -69,7 +69,7 @@ class StampTask(Task):
         return self.__class__.task
 
     def run(self):
-        self.cacheComplete = None # invalidate the cache
+        self.invalidateCache()
         if self.complete():
             return
         super().run()

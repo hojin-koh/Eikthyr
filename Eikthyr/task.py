@@ -17,19 +17,15 @@ import pickle
 from hashlib import md5
 from inspect import getsource
 
-import logging
 import time
 from plumbum import FG
 
 from luigi.task import flatten
 from .data import Target
 
+from . import cache
 from logzero import setup_logger
 logger = setup_logger('Eikthyr')
-
-import os
-from http.client import HTTPConnection
-from urllib.parse import quote_plus
 
 class Task(lg.Task):
     checkInputHash = True
@@ -92,39 +88,23 @@ class Task(lg.Task):
         return self.hashSrc
 
     def invalidateCache(self):
-        if 'EIKTHYR_CACHE_IP' in os.environ:
-            try:
-                h = HTTPConnection(os.environ['EIKTHYR_CACHE_IP'], int(os.environ['EIKTHYR_CACHE_PORT']))
-                h.request('DELETE', '/{}'.format(quote_plus(repr(self))))
-                h.getresponse()
-            finally:
-                h.close()
+        if cache.isAvailable():
+            rslt = cache.deleteObj(self)
         else:
             self.cacheComplete = None
 
     def writeCache(self, rslt):
-        if 'EIKTHYR_CACHE_IP' in os.environ:
-            try:
-                data = bytes(rslt)
-                h = HTTPConnection(os.environ['EIKTHYR_CACHE_IP'], int(os.environ['EIKTHYR_CACHE_PORT']))
-                h.request('PUT', '/{}'.format(quote_plus(repr(self))), body=data, headers={'Content-Length': len(data)})
-                h.getresponse()
-            finally:
-                h.close()
+        if cache.isAvailable():
+            cache.putObj(self, rslt)
         else:
             self.cacheComplete = rslt
         return rslt
 
     def complete(self):
-        if 'EIKTHYR_CACHE_IP' in os.environ:
-            try:
-                h = HTTPConnection(os.environ['EIKTHYR_CACHE_IP'], int(os.environ['EIKTHYR_CACHE_PORT']))
-                h.request('GET', '/{}'.format(quote_plus(repr(self))))
-                r = h.getresponse()
-                if r.status == 200:
-                    return bool(r.read(int(r.headers['Content-Length'])))
-            finally:
-                h.close()
+        if cache.isAvailable():
+            rslt = cache.getObj(self)
+            if rslt != None:
+                return rslt
         elif self.cacheComplete is not None:
             return self.cacheComplete
 
