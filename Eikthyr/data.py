@@ -17,11 +17,9 @@ import luigi as lg
 from pathlib import Path
 from contextlib import contextmanager
 from hashlib import md5
-import pickle
 import json
 
 from luigi.local_target import LocalFileSystem
-from luigi.task import flatten
 from .config import metadir
 
 from . import cache
