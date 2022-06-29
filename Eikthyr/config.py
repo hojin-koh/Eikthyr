@@ -12,5 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# TODO make these configurable in luigi config file
 metadir = "meta"
 stampdir = "stamp"

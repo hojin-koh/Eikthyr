@@ -27,6 +27,10 @@ from .data import Target
 from logzero import setup_logger
 logger = setup_logger('Eikthyr')
 
+import os
+from http.client import HTTPConnection
+from urllib.parse import quote_plus
+
 class Task(lg.Task):
     checkInputHash = True
     checkOutputHash = True
@@ -64,7 +68,7 @@ class Task(lg.Task):
             logger.debug("Start {}".format(self))
             self.timeStart = time.time()
         rtn = self.task()
-        self.cacheComplete = None # invalidate the cache
+        self.invalidateCache()
         logger.info("End {} in {:.3f}s\n".format(self, time.time() - self.timeStart))
         return rtn
 
@@ -87,25 +91,57 @@ class Task(lg.Task):
                 self.hashSrc.sort()
         return self.hashSrc
 
+    def invalidateCache(self):
+        if 'EIKTHYR_CACHE_IP' in os.environ:
+            try:
+                h = HTTPConnection(os.environ['EIKTHYR_CACHE_IP'], int(os.environ['EIKTHYR_CACHE_PORT']))
+                h.request('DELETE', '/{}'.format(quote_plus(repr(self))))
+                h.getresponse()
+            finally:
+                h.close()
+        else:
+            self.cacheComplete = None
+
+    def writeCache(self, rslt):
+        if 'EIKTHYR_CACHE_IP' in os.environ:
+            try:
+                data = bytes(rslt)
+                h = HTTPConnection(os.environ['EIKTHYR_CACHE_IP'], int(os.environ['EIKTHYR_CACHE_PORT']))
+                h.request('PUT', '/{}'.format(quote_plus(repr(self))), body=data, headers={'Content-Length': len(data)})
+                h.getresponse()
+            finally:
+                h.close()
+        else:
+            self.cacheComplete = rslt
+        return rslt
+
     def complete(self):
-        if self.cacheComplete is not None:
+        if 'EIKTHYR_CACHE_IP' in os.environ:
+            try:
+                h = HTTPConnection(os.environ['EIKTHYR_CACHE_IP'], int(os.environ['EIKTHYR_CACHE_PORT']))
+                h.request('GET', '/{}'.format(quote_plus(repr(self))))
+                r = h.getresponse()
+                if r.status == 200:
+                    return bool(r.read(int(r.headers['Content-Length'])))
+            finally:
+                h.close()
+        elif self.cacheComplete is not None:
             return self.cacheComplete
 
         # Check whether the dependencies are fine
         for tgt in flatten(self.input()):
             if not isinstance(tgt, Target): continue
             if not tgt.task.complete():
-                return False
+                return self.writeCache(False)
 
         outputs = flatten(self.output())
         if len(outputs) == 0:
-            return False
+            return self.writeCache(False)
         for t in outputs:
             if isinstance(t, Target):
                 if t.isOutdated():
-                    return False
+                    return self.writeCache(False)
             else:
                 if not t.exists():
-                    return False
-        self.cacheComplete = True
-        return True
+                    return self.writeCache(False)
+        return self.writeCache(True)

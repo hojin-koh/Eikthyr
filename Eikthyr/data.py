@@ -24,6 +24,10 @@ from luigi.local_target import LocalFileSystem
 from luigi.task import flatten
 from .config import metadir
 
+import os
+from http.client import HTTPConnection
+from urllib.parse import quote_plus
+
 class LocalOverwriteFileSystem(LocalFileSystem):
     def rename_dont_move(self, path, dest):
         self.move(path, dest, raise_if_exists=False)
@@ -37,7 +41,9 @@ class Target(lg.LocalTarget):
         self.metapath = Path(metadir) / "{}.json".format(self.path)
 
         self.objMeta = None
-        self.cacheOutdated = None
+
+    def __repr__(self):
+        return '{}({})'.format(self.__class__.__name__, self.path)
 
     @contextmanager
     def pathWrite(self):
@@ -75,13 +81,40 @@ class Target(lg.LocalTarget):
 
         with self.metapath.open('w') as fpwMeta:
             json.dump(objMeta, fpwMeta, indent=2, sort_keys=True)
-        self.objMeta = objMeta
+        self.writeCache(objMeta)
+
+    def writeCache(self, objMeta=None):
+        if objMeta == None:
+            with self.metapath.open() as fpMeta:
+                objMeta = json.load(fpMeta)
+
+        if 'EIKTHYR_CACHE_IP' in os.environ:
+            try:
+                data = bytes(json.dumps(objMeta), 'utf-8')
+                h = HTTPConnection(os.environ['EIKTHYR_CACHE_IP'], int(os.environ['EIKTHYR_CACHE_PORT']))
+                h.request('PUT', '/{}'.format(quote_plus(repr(self))), body=data, headers={'Content-Length': len(data)})
+                h.getresponse()
+            finally:
+                h.close()
+        else:
+            self.objMeta = objMeta
+        return objMeta
 
     def getMeta(self):
-        if self.objMeta == None:
-            with self.metapath.open() as fpMeta:
-                self.objMeta = json.load(fpMeta)
-        return self.objMeta
+        if 'EIKTHYR_CACHE_IP' in os.environ:
+            try:
+                h = HTTPConnection(os.environ['EIKTHYR_CACHE_IP'], int(os.environ['EIKTHYR_CACHE_PORT']))
+                h.request('GET', '/{}'.format(quote_plus(repr(self))))
+                r = h.getresponse()
+                if r.status == 200:
+                    return json.loads(r.read(int(r.headers['Content-Length'])))
+                else:
+                    return self.writeCache()
+            finally:
+                h.close()
+        elif self.objMeta != None:
+            return self.objMeta
+        return self.writeCache()
 
     def isOutdated(self):
         if not Path(self.path).exists():

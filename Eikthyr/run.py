@@ -26,7 +26,7 @@ import atexit
 import threading
 from random import randint
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-dataCache = {}
+mCache = {}
 sock = None # The IPC server for exchanging cached task information
 
 class _EikthyrFactory(_WorkerSchedulerFactory):
@@ -36,26 +36,57 @@ class _EikthyrFactory(_WorkerSchedulerFactory):
             scheduler=scheduler, worker_processes=worker_processes, assistant=assistant, check_complete_on_run=True, check_unfulfilled_deps=False)
 
 class RequestHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        print('HANDLE GET')
-        pass
+    # Suppress the log message from HTTP request
+    def log_message(self, format, *args):
+        return
 
-def startCache(tasks, print_summary=True):
+    def do_GET(self):
+        global mCache
+        if self.path in mCache:
+            #print('GET: {} 200 {}'.format(self.path, mCache[self.path]))
+            self.send_response(200)
+            self.send_header('Content-Type', "text/json")
+            self.send_header('Content-Length', len(mCache[self.path]))
+            self.end_headers()
+            self.wfile.write(mCache[self.path])
+        else:
+            #print('GET: {} 404'.format(self.path))
+            self.send_response(404)
+            self.end_headers()
+
+    def do_PUT(self):
+        global mCache
+        mCache[self.path] = self.rfile.read(int(self.headers['Content-Length']))
+        #print('PUT: {} {}'.format(self.path, mCache[self.path]))
+        self.send_response(201)
+        self.end_headers()
+
+    def do_DELETE(self):
+        global mCache
+        #print('DELETE: {}'.format(self.path))
+        if self.path in mCache:
+            del mCache[self.path]
+        self.send_response(201)
+        self.end_headers()
+
+def startCache():
     # Start the cacche server if not already
     global sock
     if sock == None:
-        sock = ThreadingHTTPServer(('127.0.{:d}.{:d}'.format(randint(1,251), randint(1,251)), 0), RequestHandler)
+        sock = ThreadingHTTPServer(('127.{:d}.{:d}.{:d}'.format(randint(1,251), randint(1,251), randint(1,251)), 0), RequestHandler)
         thr = threading.Thread(target=sock.serve_forever, daemon=True)
         thr.start()
         ip, port = sock.server_address
         logger.debug("Task cache server started at {}:{}".format(ip, port))
         os.environ['EIKTHYR_CACHE_IP'] = ip
-        os.environ['EIKTHYR_CACHE_PORT'] = port
+        os.environ['EIKTHYR_CACHE_PORT'] = str(port)
 
-def run(tasks, print_summary=True):
+def run(tasks, print_summary=True, workers=1):
+    if workers > 1:
+        startCache()
     t0 = time.time()
     rtn = lg.build(tasks, local_scheduler=True, log_level='WARNING', detailed_summary=True,
-            workers=1, worker_scheduler_factory=_EikthyrFactory())
+            workers=workers, worker_scheduler_factory=_EikthyrFactory())
     if print_summary:
         logger.info("Total Time Spent: {:.3f}s".format(time.time() - t0))
         logger.debug(rtn.summary_text)
