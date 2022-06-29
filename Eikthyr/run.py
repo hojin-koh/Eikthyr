@@ -21,13 +21,34 @@ from luigi import worker
 from logzero import setup_logger
 logger = setup_logger('Eikthyr')
 
+import atexit
+import threading
+from random import randint
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+dataCache = {}
+sock = None # The IPC server for exchanging cached task information
+
 class _EikthyrFactory(_WorkerSchedulerFactory):
     def create_worker(self, scheduler, worker_processes, assistant=False):
         # Based on the suggestions in https://github.com/spotify/luigi/issues/2992
         return worker.Worker(
             scheduler=scheduler, worker_processes=worker_processes, assistant=assistant, check_complete_on_run=True, check_unfulfilled_deps=False)
 
+class RequestHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        print('HANDLE GET')
+        pass
+
 def run(tasks, print_summary=True):
+    # Start the cacche server if not already
+    global sock
+    if sock == None:
+        sock = ThreadingHTTPServer(('127.0.{:d}.{:d}'.format(randint(1,251), randint(1,251)), 0), RequestHandler)
+        thr = threading.Thread(target=sock.serve_forever, daemon=True)
+        thr.start()
+        ip, port = sock.server_address
+        logger.debug("Task cache server started at {}:{}".format(ip, port))
+        
     t0 = time.time()
     rtn = lg.build(tasks, local_scheduler=True, log_level='WARNING', detailed_summary=True,
             workers=1, worker_scheduler_factory=_EikthyrFactory())
@@ -35,3 +56,11 @@ def run(tasks, print_summary=True):
         logger.info("Total Time Spent: {:.3f}s".format(time.time() - t0))
         logger.debug(rtn.summary_text)
     return rtn
+
+@atexit.register
+def closeSocket():
+    global sock
+    if sock != None:
+        sock.shutdown()
+        sock.server_close()
+        logger.debug('Task cache server stopped')
