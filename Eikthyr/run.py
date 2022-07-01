@@ -27,7 +27,7 @@ class _EikthyrFactory(_WorkerSchedulerFactory):
     def create_worker(self, scheduler, worker_processes, assistant=False):
         # Based on the suggestions in https://github.com/spotify/luigi/issues/2992
         return worker.Worker(
-            scheduler=scheduler, worker_processes=worker_processes, assistant=assistant, check_complete_on_run=True, check_unfulfilled_deps=False)
+            scheduler=scheduler, worker_processes=worker_processes, assistant=assistant, check_complete_on_run=True, check_unfulfilled_deps=False, keep_alive=True)
 
 def run(tasks, print_summary=True, workers=1):
     if workers > 1:
