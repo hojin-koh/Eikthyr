@@ -19,9 +19,7 @@ from pathlib import Path
 from .task import Task
 from .data import Target
 from .param import TargetParameter
-
-from logzero import setup_logger
-logger = setup_logger('Eikthyr')
+from .logging import logger
 
 # Wrapper for an input file
 class InputTask(Task):

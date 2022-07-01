@@ -16,8 +16,7 @@ import luigi as lg
 from plumbum import local
 
 import sys
-from logzero import setup_logger
-logger = setup_logger('Eikthyr')
+from .logging import logger
 
 class EnvCheck(object):
     _instance = None 

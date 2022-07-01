@@ -18,10 +18,8 @@ import time
 from luigi.interface import _WorkerSchedulerFactory
 from luigi import worker
 
-from logzero import setup_logger
-logger = setup_logger('Eikthyr')
-
 from .cache import startCache
+from .logging import logger
 
 class _EikthyrFactory(_WorkerSchedulerFactory):
     def create_worker(self, scheduler, worker_processes, assistant=False):

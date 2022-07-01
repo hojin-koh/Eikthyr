@@ -21,11 +21,10 @@ import time
 from plumbum import FG
 
 from luigi.task import flatten
-from .data import Target
 
+from .data import Target
 from . import cache
-from logzero import setup_logger
-logger = setup_logger('Eikthyr')
+from .logging import logger
 
 class Task(lg.Task):
     checkInputHash = True

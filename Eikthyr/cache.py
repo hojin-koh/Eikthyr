@@ -18,8 +18,7 @@ from http.client import HTTPConnection
 from urllib.parse import quote_plus
 from contextlib import contextmanager
 
-from logzero import setup_logger
-logger = setup_logger('Eikthyr')
+from .logging import logger
 
 import atexit
 import threading

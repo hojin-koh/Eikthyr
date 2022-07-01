@@ -16,5 +16,8 @@ from Eikthyr.specialtask import InputTask
 from Eikthyr.specialtask import TargetWrapperTask
 from Eikthyr.specialtask import StampTask
 
+from Eikthyr import logging
+from Eikthyr.logging import logger
+
 from Eikthyr import run
 from Eikthyr.run import run
