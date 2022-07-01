@@ -39,8 +39,8 @@ class Task(lg.Task):
             self.objOutput = self.generates()
         else:
             self.objOutput = None
-        self.cacheComplete = None
-        self.hashSrc = None
+        self._cacheComplete = None
+        self._hashSrc = None
 
     def output(self):
         return self.objOutput;
@@ -78,26 +78,26 @@ class Task(lg.Task):
             return '0'
 
     def getSrcHash(self):
-        if self.hashSrc == None:
-            self.hashSrc = []
+        if self._hashSrc == None:
+            self._hashSrc = []
             if self.checkInputHash:
                 for tgt in flatten(self.input()):
                     if not isinstance(tgt, Target): continue
-                    self.hashSrc.append(tgt.getMeta()['gen']['out'])
-                self.hashSrc.sort()
-        return self.hashSrc
+                    self._hashSrc.append(tgt.getMeta()['gen']['out'])
+                self._hashSrc.sort()
+        return self._hashSrc
 
     def invalidateCache(self):
         if cache.isAvailable():
             rslt = cache.deleteObj(self)
         else:
-            self.cacheComplete = None
+            self._cacheComplete = None
 
     def writeCache(self, rslt):
         if cache.isAvailable():
             cache.putObj(self, rslt)
         else:
-            self.cacheComplete = rslt
+            self._cacheComplete = rslt
         return rslt
 
     def complete(self):
@@ -105,8 +105,8 @@ class Task(lg.Task):
             rslt = cache.getObj(self)
             if rslt != None:
                 return rslt
-        elif self.cacheComplete is not None:
-            return self.cacheComplete
+        elif self._cacheComplete is not None:
+            return self._cacheComplete
 
         # Check whether the dependencies are fine
         for tgt in flatten(self.input()):

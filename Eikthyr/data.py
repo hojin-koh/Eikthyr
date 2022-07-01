@@ -38,7 +38,7 @@ class Target(lg.LocalTarget):
         self.task = task
         self.metapath = Path(TargetConfig().pathMeta) / "{}.json".format(self.path)
 
-        self.objMeta = None
+        self._objMeta = None
 
     def __repr__(self):
         return '{}({})'.format(self.__class__.__name__, self.path)
@@ -89,7 +89,7 @@ class Target(lg.LocalTarget):
         if cache.isAvailable():
             cache.putObj(self, objMeta)
         else:
-            self.objMeta = objMeta
+            self._objMeta = objMeta
         return objMeta
 
     def getMeta(self):
@@ -97,8 +97,8 @@ class Target(lg.LocalTarget):
             rslt = cache.getObj(self)
             if rslt != None:
                 return rslt
-        elif self.objMeta != None:
-            return self.objMeta
+        elif self._objMeta != None:
+            return self._objMeta
         return self.writeCache()
 
     def isOutdated(self):
