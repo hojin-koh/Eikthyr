@@ -1,5 +1,3 @@
-from Eikthyr import config
-
 from Eikthyr import data
 from Eikthyr.data import Target
 

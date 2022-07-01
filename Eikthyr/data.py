@@ -24,7 +24,7 @@ from luigi.local_target import LocalFileSystem
 from . import cache
 
 class TargetConfig(lg.Config):
-    pathMeta = luigi.Parameter(default='meta')
+    pathMeta = lg.Parameter(default='meta')
 
 class LocalOverwriteFileSystem(LocalFileSystem):
     def rename_dont_move(self, path, dest):
