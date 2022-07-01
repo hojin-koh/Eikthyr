@@ -23,8 +23,8 @@ from luigi.local_target import LocalFileSystem
 
 from . import cache
 
-class TargetConfig(lg.Config):
-    pathMeta = lg.Parameter(default='meta')
+class MetaConfig(lg.Config):
+    pathMeta = lg.Parameter(default='.meta')
 
 class LocalOverwriteFileSystem(LocalFileSystem):
     def rename_dont_move(self, path, dest):
@@ -36,7 +36,7 @@ class Target(lg.LocalTarget):
     def __init__(self, task, path):
         super().__init__(path)
         self.task = task
-        self.metapath = Path(TargetConfig().pathMeta) / "{}.json".format(self.path)
+        self.metapath = Path(MetaConfig().pathMeta) / "{}.json".format(self.path)
 
         self._objMeta = None
 
