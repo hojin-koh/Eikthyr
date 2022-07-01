@@ -4,6 +4,9 @@ from Eikthyr.data import Target
 from Eikthyr import task
 from Eikthyr.task import Task
 
+from Eikthyr import envcheck
+from Eikthyr.envcheck import EnvCheck
+
 from Eikthyr import param
 from Eikthyr.param import TaskParameter
 from Eikthyr.param import TargetParameter
