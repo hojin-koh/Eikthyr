@@ -5,8 +5,8 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="Eikthyr",
-    version="0.0.1",
-    author="Hojin KOh",
+    version="0.1.2",
+    author="Hojin Koh",
     author_email="hojin-koh@users.noreply.github.com",
     description="Scientific Extensions of luigi",
     long_description=long_description,
