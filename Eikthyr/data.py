@@ -15,6 +15,7 @@
 import luigi as lg
 
 from pathlib import Path
+from shutil import rmtree
 from contextlib import contextmanager
 from hashlib import md5
 import json
@@ -28,7 +29,11 @@ class MetaConfig(lg.Config):
 
 class LocalOverwriteFileSystem(LocalFileSystem):
     def rename_dont_move(self, path, dest):
-        self.move(path, dest, raise_if_exists=False)
+        if Path(dest).is_dir():
+            rmtree(dest)
+            self.move(path, dest)
+        else:
+            self.move(path, dest, raise_if_exists=False)
 
 class Target(lg.LocalTarget):
     fs = LocalOverwriteFileSystem()
