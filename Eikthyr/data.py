@@ -41,7 +41,14 @@ class Target(lg.LocalTarget):
     def __init__(self, task, path):
         super().__init__(path)
         self.task = task
-        self.metapath = Path(MetaConfig().pathMeta) / "{}.json".format(self.path)
+        pathForMeta = Path(self.path)
+        if pathForMeta.is_absolute():
+            if pathForMeta.is_relative_to(Path.cwd()):
+                self.metapath = Path(MetaConfig().pathMeta) / "{}.json".format(pathForMeta.relative_to(Path.cwd()))
+            else:
+                self.metapath = Path(MetaConfig().pathMeta) / "{}.json".format(pathForMeta.relative_to(pathForMeta.root))
+        else:
+            self.metapath = Path(MetaConfig().pathMeta) / "{}.json".format(self.path)
 
         self._objMeta = None
 
