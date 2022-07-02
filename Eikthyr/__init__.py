@@ -11,7 +11,9 @@ from Eikthyr import envcheck
 from Eikthyr.envcheck import EnvCheck
 
 from Eikthyr import param
+from Eikthyr.param import WhateverParameter
 from Eikthyr.param import TaskParameter
+from Eikthyr.param import TaskListParameter
 from Eikthyr.param import TargetParameter
 
 from Eikthyr import specialtask

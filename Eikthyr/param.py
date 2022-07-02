@@ -16,6 +16,10 @@ import luigi as lg
 
 from .data import Target
 
+class WhateverParameter(lg.Parameter):
+    def _warn_on_wrong_param_type(self, param_name, param_value):
+        return
+
 class TaskParameter(lg.Parameter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -26,6 +30,18 @@ class TaskParameter(lg.Parameter):
             return
         if not isinstance(param_value, lg.Task):
             raise ValueError("parameter {} must be a Eikthyr task, got {} instead".format(param_name, param_value))
+
+class TaskListParameter(lg.Parameter):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.significant = False
+
+    def _warn_on_wrong_param_type(self, param_name, param_value):
+        if self.__class__ != TaskListParameter:
+            return
+        for t in param_value:
+            if not isinstance(t, lg.Task):
+                raise ValueError("parameter {} must be a list of Eikthyr task, got {} instead".format(param_name, param_value))
 
 class TargetParameter(lg.Parameter):
     def __init__(self, *args, **kwargs):
