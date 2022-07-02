@@ -51,7 +51,8 @@ class TargetWrapperTask(lg.Task):
 
 # Stamp: if code don't change, no need to re-run
 class StampTask(Task):
-    pathStamp = lg.Parameter(default='stamp')
+    # TODO: delete all "default"
+    pathStamp = lg.Parameter(default='.stamp', positional=False)
 
     # This task doesn't care about the whether the upstream sources changed
     checkInputHash = False
@@ -60,11 +61,8 @@ class StampTask(Task):
     checkOutputHash = False
 
     def generates(self):
-        # Let's turn outself into a filename
+        # Let's turn ourself into a filename
         return Target(self, Path(self.pathStamp) / "".join(c for c in repr(self) if c.isalnum()))
-
-    def getCode(self):
-        return self.__class__.task
 
     def run(self):
         self.invalidateCache()
