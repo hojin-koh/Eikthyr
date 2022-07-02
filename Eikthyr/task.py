@@ -12,21 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from .cmd import MixinCmdUtilities
+
 import luigi as lg
 import pickle
 from hashlib import md5
 from inspect import getsource
 
 import time
-from plumbum import FG
-
 from luigi.task import flatten
 
 from .data import Target
 from . import cache
 from .logging import logger
 
-class Task(lg.Task):
+class Task(lg.Task, MixinCmdUtilities):
     checkInputHash = True
     checkOutputHash = True
     checkCodeHash = True
@@ -43,11 +43,6 @@ class Task(lg.Task):
 
     def output(self):
         return self.objOutput;
-
-    # Expected to get a plumbum object
-    def ex(self, chain):
-        logger.info("EX: {}".format(chain))
-        chain & FG
 
     def getSignature(self):
         if self.checkSignature:

@@ -1,6 +1,9 @@
 from Eikthyr import data
 from Eikthyr.data import Target
 
+from Eikthyr import cmd
+from Eikthyr.cmd import MixinCmdUtilities
+
 from Eikthyr import task
 from Eikthyr.task import Task
 
