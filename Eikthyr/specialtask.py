@@ -51,8 +51,7 @@ class TargetWrapperTask(lg.Task):
 
 # Stamp: if code don't change, no need to re-run
 class StampTask(Task):
-    # TODO: delete all "default"
-    pathStamp = lg.Parameter(default='.stamp', positional=False)
+    pathStamp = lg.Parameter('.stamp', positional=False)
 
     # This task doesn't care about the whether the upstream sources changed
     checkInputHash = False
