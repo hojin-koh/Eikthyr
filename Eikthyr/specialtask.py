@@ -21,6 +21,8 @@ from .data import Target
 from .param import PathParameter, TargetParameter
 from .logging import logger
 
+import re
+
 # Wrapper for an input file
 class InputTask(Task):
     src = lg.Parameter()
@@ -56,12 +58,12 @@ class StampTask(Task):
     # This task doesn't care about the whether the upstream sources changed
     checkInputHash = False
 
-    # We only generate one single empty stamp file, what's the point?
-    checkOutputHash = False
+    def getStampFileName(self):
+        return re.sub('pathStamp=[^ ]+, ', ' ', repr(self))
 
     def generates(self):
         # Let's turn ourself into a filename
-        return Target(self, Path(self.pathStamp).resolve() / "".join(c for c in repr(self) if c.isalnum()))
+        return Target(self, Path(self.pathStamp).resolve() / "".join(c for c in self.getStampFileName() if c.isalnum()))
 
     def run(self):
         self.invalidateCache()
@@ -69,4 +71,4 @@ class StampTask(Task):
             return
         super().run()
         with self.output().fpWrite() as fpw:
-            pass
+            fpw.write(self.getCodeHash())
