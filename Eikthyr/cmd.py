@@ -44,5 +44,6 @@ class MixinCmdUtilities(object):
     def cmd(self):
         return local.cmd
 
-    def local(self, path):
-        return local[path]
+    @property
+    def local(self):
+        return local
