@@ -131,5 +131,5 @@ class Target(lg.LocalTarget):
         # Check hashes of dependencies
         if self.task.getSrcHash() != objGen['src']:
             return True
-               
+
         return False

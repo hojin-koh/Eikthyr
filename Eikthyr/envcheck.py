@@ -19,13 +19,13 @@ import sys
 from .logging import logger
 
 class EnvCheck(object):
-    _instance = None 
+    _instance = None
     cmd = None
 
-    def __new__(cls, *args, **kwargs): 
-        if cls._instance is None: 
-            cls._instance = object.__new__(cls) 
-        return cls._instance 
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = object.__new__(cls)
+        return cls._instance
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -40,7 +40,7 @@ class EnvCheck(object):
 
     def failCmd(self, cmd):
         self.fail("Command '{}' not found".format(cmd))
-         
+
     def fail(self, msg):
         logger.error("Environment check {} failed: {}".format(self.__class__.__name__, msg))
         sys.exit(1)
