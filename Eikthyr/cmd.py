@@ -16,7 +16,6 @@ import os
 from pathlib import Path
 from plumbum import FG
 from contextlib import contextmanager
-import plumbum.cmd as cmd
 from plumbum import FG, local
 
 from .logging import logger
@@ -43,7 +42,7 @@ class MixinCmdUtilities(object):
     # Produce plumbum objects
     @property
     def cmd(self):
-        return cmd
+        return local.cmd
 
     def local(self, path):
         return local[path]
