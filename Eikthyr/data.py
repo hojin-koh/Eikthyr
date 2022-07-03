@@ -47,7 +47,7 @@ class Target(lg.LocalTarget):
                 pathForMeta = pathForMeta.relative_to(Path.cwd())
             else:
                 pathForMeta = pathForMeta.relative_to(pathForMeta.root)
-        self.metapath = Path(MetaConfig().pathMeta) / "{}.json".format(pathForMeta)
+        self.metapath = Path(MetaConfig().pathMeta).resolve() / "{}.json".format(pathForMeta)
         self.pathRel = str(pathForMeta)
 
         self._objMeta = None

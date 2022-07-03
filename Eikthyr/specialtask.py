@@ -61,7 +61,7 @@ class StampTask(Task):
 
     def generates(self):
         # Let's turn ourself into a filename
-        return Target(self, Path(self.pathStamp) / "".join(c for c in repr(self) if c.isalnum()))
+        return Target(self, Path(self.pathStamp).resolve() / "".join(c for c in repr(self) if c.isalnum()))
 
     def run(self):
         self.invalidateCache()
