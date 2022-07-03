@@ -21,6 +21,7 @@ from inspect import getsource
 
 import time
 from luigi.task import flatten
+from colorama import Fore, Style
 
 from .data import Target
 from . import cache
@@ -55,7 +56,7 @@ class Task(lg.Task, MixinCmdUtilities):
 
     def run(self):
         if not hasattr(self, 'timeStart'):
-            logger.debug("Start {}".format(self))
+            logger.debug("{}{}Start {}{}".format(Fore.CYAN, Style.BRIGHT, self, Style.RESET_ALL))
             self.timeStart = time.time()
         rtn = self.task()
         self.invalidateCache()
