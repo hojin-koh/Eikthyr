@@ -18,7 +18,7 @@ from pathlib import Path
 
 from .task import Task
 from .data import Target
-from .param import TargetParameter
+from .param import PathParameter, TargetParameter
 from .logging import logger
 
 # Wrapper for an input file
@@ -51,7 +51,7 @@ class TargetWrapperTask(lg.Task):
 
 # Stamp: if code don't change, no need to re-run
 class StampTask(Task):
-    pathStamp = lg.Parameter('.stamp', positional=False)
+    pathStamp = PathParameter('.stamp', positional=False)
 
     # This task doesn't care about the whether the upstream sources changed
     checkInputHash = False

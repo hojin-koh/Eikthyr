@@ -44,11 +44,11 @@ class Target(lg.LocalTarget):
         pathForMeta = Path(self.path)
         if pathForMeta.is_absolute():
             if pathForMeta.is_relative_to(Path.cwd()):
-                self.metapath = Path(MetaConfig().pathMeta) / "{}.json".format(pathForMeta.relative_to(Path.cwd()))
+                pathForMeta = pathForMeta.relative_to(Path.cwd())
             else:
-                self.metapath = Path(MetaConfig().pathMeta) / "{}.json".format(pathForMeta.relative_to(pathForMeta.root))
-        else:
-            self.metapath = Path(MetaConfig().pathMeta) / "{}.json".format(self.path)
+                pathForMeta = pathForMeta.relative_to(pathForMeta.root)
+        self.metapath = Path(MetaConfig().pathMeta) / "{}.json".format(pathForMeta)
+        self.pathRel = str(pathForMeta)
 
         self._objMeta = None
 

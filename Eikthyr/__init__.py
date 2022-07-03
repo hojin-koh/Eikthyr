@@ -15,6 +15,9 @@ from Eikthyr.param import WhateverParameter
 from Eikthyr.param import TaskParameter
 from Eikthyr.param import TaskListParameter
 from Eikthyr.param import TargetParameter
+from Eikthyr.param import PathParameter
+from luigi import Parameter
+from luigi import ListParameter
 
 from Eikthyr import specialtask
 from Eikthyr.specialtask import InputTask

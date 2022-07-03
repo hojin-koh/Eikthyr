@@ -12,29 +12,50 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from .data import Target
+from .task import Task
+
 import luigi as lg
 
-from .data import Target
+from pathlib import Path
 
 class WhateverParameter(lg.Parameter):
     def _warn_on_wrong_param_type(self, param_name, param_value):
         return
 
+class PathParameter(lg.Parameter):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _warn_on_wrong_param_type(self, param_name, param_value):
+        Path(param_value)
+
+    def serialize(self, x):
+        pathForShow = Path(x)
+        if pathForShow.is_absolute():
+            if pathForShow.is_relative_to(Path.cwd()):
+                pathForShow = pathForShow.relative_to(Path.cwd())
+        return str(pathForShow)
+
 class TaskParameter(lg.Parameter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.significant = False
 
     def _warn_on_wrong_param_type(self, param_name, param_value):
         if self.__class__ != TaskParameter:
             return
-        if not isinstance(param_value, lg.Task):
+        if not isinstance(param_value, Task):
             raise ValueError("parameter {} must be a Eikthyr task, got {} instead".format(param_name, param_value))
+
+    def serialize(self, x):
+        try:
+            return x.output().pathRel
+        except:
+            return super().serialize(x)
 
 class TaskListParameter(lg.Parameter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.significant = False
 
     def _warn_on_wrong_param_type(self, param_name, param_value):
         if self.__class__ != TaskListParameter:
@@ -42,6 +63,12 @@ class TaskListParameter(lg.Parameter):
         for t in param_value:
             if not isinstance(t, lg.Task):
                 raise ValueError("parameter {} must be a list of Eikthyr task, got {} instead".format(param_name, param_value))
+
+    def serialize(self, xs):
+        try:
+            return ' '.join(sorted([x.output().pathRel for x in xs]))
+        except:
+            return super().serialize(xs)
 
 class TargetParameter(lg.Parameter):
     def __init__(self, *args, **kwargs):
@@ -52,3 +79,9 @@ class TargetParameter(lg.Parameter):
             return
         if not isinstance(param_value, Target):
             raise ValueError("parameter {} must be a Eikthyr target, got {} instead".format(param_name, param_value))
+
+    def serialize(self, x):
+        try:
+            return x.pathRel
+        except:
+            return super().serialize(x)
