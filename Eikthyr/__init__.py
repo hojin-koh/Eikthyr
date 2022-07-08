@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from Eikthyr import data
 from Eikthyr.data import Target
 
