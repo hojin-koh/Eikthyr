@@ -40,7 +40,7 @@ class Target(lg.LocalTarget):
     fs = LocalOverwriteFileSystem()
 
     def __init__(self, task, path):
-        super().__init__(path)
+        super().__init__(str(path))
         self.task = task
         pathForMeta = Path(self.path)
         if pathForMeta.is_absolute():
