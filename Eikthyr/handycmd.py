@@ -32,5 +32,19 @@ def packZst(output, path='.', files=('.',), excludes=(), strip=0, zstd=22, key='
     args += files
     chain = tar[args]
     chain = chain | cmd.zstd['-T3', '-c', '--ultra', '-{}'.format(zstd)]
-    # TODO: encryption
+    if len(key) > 0:
+        chain = chain | cmd.openssl['enc', '-aria-256-ecb', '-pbkdf2', '-k', key]
     (chain > output) & FG
+
+def unpackZst(src, path='.', key='', extras=()):
+    if 'bsdtar' in local:
+        tar = cmd.bsdtar
+    else:
+        tar = cmd.tar
+    args = ['-xf', '-', '-C', path, *extras]
+    if len(key) > 0:
+        chain = cmd.openssl['enc', '-aria-256-ecb', '-d', '-pbkdf2', '-in', src, '-k', key] | tar[args]
+    else:
+        chain = tar[args] < src
+    Path(path).mkdir(parents=True, exist_ok=True)
+    chain & FG
