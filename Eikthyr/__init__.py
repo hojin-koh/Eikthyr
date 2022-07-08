@@ -19,6 +19,9 @@ from Eikthyr.param import TargetParameter
 from Eikthyr.param import PathParameter
 from luigi import Parameter
 from luigi import ListParameter
+from luigi import BoolParameter
+from luigi import IntParameter
+from luigi import FloatParameter
 
 from Eikthyr import specialtask
 from Eikthyr.specialtask import InputTask
@@ -30,3 +33,5 @@ from Eikthyr.logging import logger
 
 from Eikthyr import run
 from Eikthyr.run import run
+
+from luigi import Config
