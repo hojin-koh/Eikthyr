@@ -13,18 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
+import atexit
 import json
-from http.client import HTTPConnection
-from urllib.parse import quote_plus
+import os
+import threading
 from contextlib import contextmanager
+from http.client import HTTPConnection
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from random import randint
+from urllib.parse import quote_plus
 
 from .logging import logger
 
-import atexit
-import threading
-from random import randint
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 mCache = {}
 sock = None # The IPC server for exchanging cached task information
 

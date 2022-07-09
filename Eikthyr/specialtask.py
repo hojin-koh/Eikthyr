@@ -13,16 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import luigi as lg
-
-from pathlib import Path
-
-from .task import Task
-from .data import Target
-from .param import PathParameter, TargetParameter
-from .logging import logger
 
 import re
+from pathlib import Path
+
+import luigi as lg
+
+from .data import Target
+from .logging import logger
+from .param import PathParameter, TargetParameter
+from .task import Task
 
 # Wrapper for an input file
 class InputTask(Task):

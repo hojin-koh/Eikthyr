@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import luigi as lg
 import time
 from datetime import timedelta
 
+import luigi as lg
 from luigi.interface import _WorkerSchedulerFactory
 from luigi import worker
 

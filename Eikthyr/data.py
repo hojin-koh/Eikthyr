@@ -13,19 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import luigi as lg
 
-from pathlib import Path
-from shutil import rmtree
+import json
 from contextlib import contextmanager
 from hashlib import md5
-import json
+from pathlib import Path
+from shutil import rmtree
 
+import luigi as lg
 from luigi.local_target import LocalFileSystem
 
 from . import cache
 
-class MetaConfig(lg.Config):
+class DataConfig(lg.Config):
     pathMeta = lg.Parameter('.meta')
 
 class LocalOverwriteFileSystem(LocalFileSystem):
@@ -48,7 +48,7 @@ class Target(lg.LocalTarget):
                 pathForMeta = pathForMeta.relative_to(Path.cwd())
             else:
                 pathForMeta = pathForMeta.relative_to(pathForMeta.root)
-        self.metapath = Path(MetaConfig().pathMeta).resolve() / "{}.json".format(pathForMeta)
+        self.metapath = Path(DataConfig().pathMeta).resolve() / "{}.json".format(pathForMeta)
         self.pathRel = str(pathForMeta)
 
         self._objMeta = None
@@ -81,7 +81,7 @@ class Target(lg.LocalTarget):
         if self.task.checkOutputHash:
             pathThis = Path(self.path)
             if pathThis.is_dir():
-                h = md5()
+                h = md5(usedforsecurity=False)
                 for f in sorted((p for p in pathThis.glob('**/*') if p.is_file())):
                     h.update(f.read_bytes())
                 objMeta['gen']['out'] = h.hexdigest()

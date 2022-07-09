@@ -14,9 +14,8 @@
 # limitations under the License.
 
 import os
-from pathlib import Path
-from plumbum import FG
 from contextlib import contextmanager
+from pathlib import Path
 from plumbum import FG, local
 
 from .logging import logger

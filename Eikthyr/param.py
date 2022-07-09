@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .data import Target
-from .task import Task
+from pathlib import Path
 
 import luigi as lg
 
-from pathlib import Path
+from .data import Target
+from .task import Task
 
 class WhateverParameter(lg.Parameter):
     def _warn_on_wrong_param_type(self, param_name, param_value):

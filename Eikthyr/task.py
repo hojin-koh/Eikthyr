@@ -13,19 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .cmd import MixinCmdUtilities
-
-import luigi as lg
+import time
 import pickle
 from hashlib import md5
 from inspect import getsource
 
-import time
+import luigi as lg
 from luigi.task import flatten
 from colorama import Fore, Style
 
-from .data import Target
 from . import cache
+from .cmd import MixinCmdUtilities
+from .data import Target
 from .logging import logger
 
 class Task(lg.Task, MixinCmdUtilities):
