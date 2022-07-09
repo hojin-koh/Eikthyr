@@ -26,7 +26,7 @@ from .task import Task
 
 # Wrapper for an input file
 class InputTask(Task):
-    src = lg.Parameter()
+    src = PathParameter()
 
     def generates(self):
         return Target(self, self.src)

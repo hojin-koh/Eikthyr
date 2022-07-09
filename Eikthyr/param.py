@@ -24,10 +24,7 @@ class WhateverParameter(lg.Parameter):
     def _warn_on_wrong_param_type(self, param_name, param_value):
         return
 
-class PathParameter(lg.Parameter):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
+class PathParameter(lg.PathParameter):
     def _warn_on_wrong_param_type(self, param_name, param_value):
         Path(param_value)
 
