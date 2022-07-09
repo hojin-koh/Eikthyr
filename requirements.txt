@@ -3,3 +3,4 @@ plumbum
 logzero
 colorama
 pytest
+hypothesis

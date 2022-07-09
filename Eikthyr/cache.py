@@ -107,8 +107,10 @@ def startCache():
         os.environ['EIKTHYR_CACHE_PORT'] = str(port)
 
 @atexit.register
-def closeSocket():
+def stopCache():
+    global sock
     if sock != None:
         sock.shutdown()
         sock.server_close()
+        sock = None
         logger.debug('Task cache server stopped')
