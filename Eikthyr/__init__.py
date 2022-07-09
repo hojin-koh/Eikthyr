@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+
+# Deal with luigi's annoying deprecation warning
+import warnings
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    import luigi as lg
+
 from Eikthyr import data
 from Eikthyr.data import Target
 
@@ -35,3 +42,4 @@ from Eikthyr import run
 from Eikthyr.run import run
 
 from luigi import Config
+
