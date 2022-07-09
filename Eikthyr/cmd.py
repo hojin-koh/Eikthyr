@@ -40,6 +40,12 @@ class MixinCmdUtilities(object):
         yield path
         os.chdir(dirCurrent)
 
+    # Change environment within a context
+    @contextmanager
+    def env(self, *args, **kwargs):
+        with self.local.env(*args, **kwargs):
+            yield
+
     # Produce plumbum objects
     @property
     def cmd(self):
