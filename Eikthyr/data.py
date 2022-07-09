@@ -48,7 +48,7 @@ class Target(lg.LocalTarget):
                 pathForMeta = pathForMeta.relative_to(Path.cwd())
             else:
                 pathForMeta = pathForMeta.relative_to(pathForMeta.root)
-        self.metapath = Path(DataConfig().pathMeta).resolve() / "{}.json".format(pathForMeta)
+        self.pathMeta = str(Path(DataConfig().pathMeta).resolve() / "{}.json".format(pathForMeta))
         self.pathRel = str(pathForMeta)
 
         self._objMeta = None
@@ -70,7 +70,7 @@ class Target(lg.LocalTarget):
         self.writeMeta()
 
     def writeMeta(self):
-        self.metapath.parent.mkdir(parents=True, exist_ok=True)
+        Path(self.pathMeta).parent.mkdir(parents=True, exist_ok=True)
         objMeta = {'data': {}, 'gen': {
             'task': self.task.getSignature(),
             'code': self.task.getCodeHash(),
@@ -90,13 +90,13 @@ class Target(lg.LocalTarget):
         else:
             objMeta['gen']['out'] = '0'
 
-        with self.metapath.open('w') as fpwMeta:
+        with Path(self.pathMeta).open('w') as fpwMeta:
             json.dump(objMeta, fpwMeta, indent=2, sort_keys=True)
         self.writeCache(objMeta)
 
     def writeCache(self, objMeta=None):
         if objMeta == None:
-            with self.metapath.open() as fpMeta:
+            with Path(self.pathMeta).open() as fpMeta:
                 objMeta = json.load(fpMeta)
 
         if cache.isAvailable():
@@ -117,7 +117,7 @@ class Target(lg.LocalTarget):
     def isOutdated(self):
         if not Path(self.path).exists():
             return True
-        if not self.metapath.exists():
+        if not Path(self.pathMeta).exists():
             return True
         if 'gen' not in self.getMeta():
             return True

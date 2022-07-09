@@ -62,7 +62,7 @@ class Task(lg.Task, MixinCmdUtilities):
             outputToCheck = list(tgt for tgt in flatten(self.output()) if isinstance(tgt, Target))
             if all(Path(tgt.path).exists() for tgt in outputToCheck):
                 for tgt in outputToCheck:
-                    if not tgt.metapath.exists():
+                    if not Path(tgt.pathMeta).exists():
                         logger.debug("Metadata for {} regenerated".format(tgt.path))
                         tgt.writeMeta()
                 self.invalidateCache()
