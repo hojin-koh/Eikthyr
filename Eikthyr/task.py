@@ -17,6 +17,7 @@ import time
 import pickle
 from hashlib import md5
 from inspect import getsource
+from pathlib import Path
 
 import luigi as lg
 from luigi.task import flatten
@@ -32,6 +33,8 @@ class Task(lg.Task, MixinCmdUtilities):
     checkOutputHash = True
     checkCodeHash = True
     checkSignature = True
+
+    ReRunForMeta = False
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -55,6 +58,17 @@ class Task(lg.Task, MixinCmdUtilities):
         return self.__class__.task
 
     def run(self):
+        if not self.ReRunForMeta:
+            outputToCheck = list(tgt for tgt in flatten(self.output()) if isinstance(tgt, Target))
+            if all(Path(tgt.path).exists() for tgt in outputToCheck):
+                for tgt in outputToCheck:
+                    if not tgt.metapath.exists():
+                        logger.debug("Metadata for {} regenerated".format(tgt.path))
+                        tgt.writeMeta()
+                self.invalidateCache()
+                if self.complete():
+                    return True
+        
         if not hasattr(self, 'timeStart'):
             logger.debug("{}{}Start {}{}".format(Fore.CYAN, Style.BRIGHT, self, Style.RESET_ALL))
             self.timeStart = time.time()
@@ -120,3 +134,6 @@ class Task(lg.Task, MixinCmdUtilities):
                 if not t.exists():
                     return self.writeCache(False)
         return self.writeCache(True)
+
+class STask(Task):
+    ReRunForMeta = True

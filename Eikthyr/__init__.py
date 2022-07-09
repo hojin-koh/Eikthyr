@@ -14,6 +14,7 @@ from Eikthyr.cmd import MixinCmdUtilities
 
 from Eikthyr import task
 from Eikthyr.task import Task
+from Eikthyr.task import STask
 
 from Eikthyr import envcheck
 from Eikthyr.envcheck import EnvCheck
