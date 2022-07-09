@@ -18,7 +18,7 @@ from pathlib import Path
 from plumbum import FG, local
 import plumbum.cmd as cmd
 
-from .logging import logger
+from ..logging import logger
 
 def getGitDesc(path='.'):
     return cmd.git('-C', path, 'describe', '--long', '--always', '--dirty', '--tags', '--abbrev=16').strip()
@@ -28,6 +28,14 @@ def packZst(output, path='.', files=('.',), excludes=(), strip=0, zstd=22, key='
         tar = cmd.bsdtar
     else:
         tar = cmd.tar
+    if (isinstance(files, str)):
+        files = (files,)
+    if (isinstance(excludes, str)):
+        excludes = (excludes,)
+    if (isinstance(extras, str)):
+        extras = (extras,)
+    if (not isinstance(key, str)):
+        key = str(key)
     args = ['-cf', '-', '-C', path, '--strip-components', strip, *extras]
     for f in excludes:
         args.append('--exclude')
@@ -45,6 +53,10 @@ def unpackZst(src, path='.', key='', extras=()):
         tar = cmd.bsdtar
     else:
         tar = cmd.tar
+    if (isinstance(extras, str)):
+        extras = (extras,)
+    if (not isinstance(key, str)):
+        key = str(key)
     args = ['-xf', '-', '-C', path, *extras]
     if len(key) > 0:
         chain = cmd.openssl['enc', '-aria-256-ecb', '-d', '-pbkdf2', '-in', src, '-k', key] | tar[args]
