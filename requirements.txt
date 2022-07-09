@@ -2,5 +2,9 @@ luigi
 plumbum
 logzero
 colorama
+
 pytest
 hypothesis
+
+twine
+build
