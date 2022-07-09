@@ -37,7 +37,7 @@ class InputTask(Task):
         self.output().writeMeta()
 
 # Wrapper for a single target
-class TargetWrapperTask(lg.Task):
+class TargetWrapperTask(Task):
     src = TargetParameter()
 
     def requires(self):
