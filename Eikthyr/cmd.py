@@ -22,7 +22,7 @@ from .logging import logger
 
 class MixinCmdUtilities(object):
 
-    # Execute to get a plumbum object
+    # Expected to get a plumbum object
     def ex(self, chain):
         logger.info("RUN: {}".format(chain))
         chain & FG
@@ -44,6 +44,10 @@ class MixinCmdUtilities(object):
     def env(self, *args, **kwargs):
         with self.local.env(*args, **kwargs):
             yield
+
+    def cmdfmt(self, lst, *args, **kwargs):
+        lst = [s.format(*args, **kwargs) for s in lst]
+        return local[lst[0]][lst[1:]]
 
     # Produce plumbum objects
     @property
