@@ -24,7 +24,7 @@ class MixinCmdUtilities(object):
 
     # Execute to get a plumbum object
     def ex(self, chain):
-        logger.info("EX: {}".format(chain))
+        logger.info("RUN: {}".format(chain))
         chain & FG
 
     # Just change dir
