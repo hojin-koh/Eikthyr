@@ -65,7 +65,7 @@ class Target(lg.LocalTarget):
 
     @contextmanager
     def fpWrite(self):
-        with self.open('w') as fpw:
+        with self.open('wb') as fpw:
             yield fpw
         self.writeMeta()
 
