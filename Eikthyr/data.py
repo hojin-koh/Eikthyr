@@ -30,10 +30,12 @@ class DataConfig(lg.Config):
 
 class LocalOverwriteFileSystem(LocalFileSystem):
     def rename_dont_move(self, path, dest):
-        if Path(dest).is_dir():
+        pathDest = path(dest)
+        if pathDest.is_dir():
             rmtree(dest)
             self.move(path, dest)
         else:
+            pathDest.unlink(missing_ok=True)
             self.move(path, dest, raise_if_exists=False)
 
 class Target(lg.LocalTarget):
