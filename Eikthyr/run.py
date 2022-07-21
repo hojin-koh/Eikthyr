@@ -36,6 +36,8 @@ class _EikthyrFactory(_WorkerSchedulerFactory):
 def run(tasks, print_summary=True, workers=1):
     if workers > 1:
         startCache()
+    if isinstance(tasks, lg.Task):
+        tasks = (tasks,)
     t0 = time.time()
     rtn = lg.build(tasks, local_scheduler=True, log_level='WARNING', detailed_summary=True,
             workers=workers, worker_scheduler_factory=_EikthyrFactory())
