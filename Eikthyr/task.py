@@ -28,6 +28,9 @@ from .cmd import MixinCmdUtilities
 from .data import Target
 from .logging import logger
 
+class ConfigEnviron(lg.Config):
+    environ = lg.DictParameter({}, significant=False, positional=False)
+
 class Task(lg.Task, MixinCmdUtilities):
     checkInputHash = True
     checkOutputHash = True
@@ -35,6 +38,8 @@ class Task(lg.Task, MixinCmdUtilities):
     checkSignature = True
 
     ReRunForMeta = False
+
+    environ = lg.DictParameter(ConfigEnviron().environ, significant=False, positional=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -68,11 +73,12 @@ class Task(lg.Task, MixinCmdUtilities):
                 self.invalidateCache()
                 if self.complete():
                     return True
-        
+
         if not hasattr(self, 'timeStart'):
             logger.debug("{}{}Start {}{}".format(Fore.CYAN, Style.BRIGHT, self, Style.RESET_ALL))
             self.timeStart = time.time()
-        rtn = self.task()
+        with self.env(**self.environ):
+            rtn = self.task()
         self.invalidateCache()
         logger.info("End {} in {:.3f}s\n".format(self, time.time() - self.timeStart))
         return rtn

@@ -25,7 +25,7 @@ from luigi.local_target import LocalFileSystem
 
 from . import cache
 
-class DataConfig(lg.Config):
+class ConfigData(lg.Config):
     pathMeta = lg.Parameter('.meta')
 
 class LocalOverwriteFileSystem(LocalFileSystem):
@@ -50,7 +50,7 @@ class Target(lg.LocalTarget):
                 pathForMeta = pathForMeta.relative_to(Path.cwd())
             else:
                 pathForMeta = pathForMeta.relative_to(pathForMeta.root)
-        self.pathMeta = str(Path(DataConfig().pathMeta).resolve() / "{}.json".format(pathForMeta))
+        self.pathMeta = str(Path(ConfigData().pathMeta).resolve() / "{}.json".format(pathForMeta))
         self.pathRel = str(pathForMeta)
 
         self._objMeta = None

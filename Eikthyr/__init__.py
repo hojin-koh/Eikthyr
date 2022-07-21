@@ -8,12 +8,13 @@ with warnings.catch_warnings():
 
 from . import data
 from .data import Target
+from .data import ConfigData
 
 from . import cmd
 from .cmd import MixinCmdUtilities
 
 from . import task
-from .task import Task
+from .task import Task as Task
 from .task import STask
 
 from . import envcheck
@@ -26,10 +27,11 @@ from .param import TaskListParameter
 from .param import TargetParameter
 from .param import PathParameter
 from luigi import Parameter
-from luigi import ListParameter
 from luigi import BoolParameter
 from luigi import IntParameter
 from luigi import FloatParameter
+from luigi import ListParameter
+from luigi import DictParameter
 
 from . import specialtask
 from .specialtask import InputTask

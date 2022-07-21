@@ -36,14 +36,25 @@ class MixinCmdUtilities(object):
     def chdir(self, path):
         dirCurrent = Path.cwd()
         os.chdir(path)
-        yield path
-        os.chdir(dirCurrent)
+        try:
+            yield path
+        finally:
+            os.chdir(dirCurrent)
 
     # Change environment within a context
     @contextmanager
-    def env(self, *args, **kwargs):
-        with self.local.env(*args, **kwargs):
-            yield
+    def env(self, **kwargs):
+        envOld = {key: os.environ[key] for key in kwargs if key in os.environ}
+        os.environ.update(kwargs)
+        try:
+            with self.local.env(**kwargs):
+                yield
+        finally:
+            for key, val in kwargs.items():
+                if key in envOld:
+                    os.environ[key] = envOld[key]
+                else:
+                    del os.environ[key]
 
     def cmdfmt(self, lst, *args, **kwargs):
         lst = [s.format(*args, **kwargs) for s in lst]
