@@ -6,41 +6,41 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     import luigi as lg
 
-from Eikthyr import data
-from Eikthyr.data import Target
+from . import data
+from .data import Target
 
-from Eikthyr import cmd
-from Eikthyr.cmd import MixinCmdUtilities
+from . import cmd
+from .cmd import MixinCmdUtilities
 
-from Eikthyr import task
-from Eikthyr.task import Task
-from Eikthyr.task import STask
+from . import task
+from .task import Task
+from .task import STask
 
-from Eikthyr import envcheck
-from Eikthyr.envcheck import EnvCheck
+from . import envcheck
+from .envcheck import EnvCheck
 
-from Eikthyr import param
-from Eikthyr.param import WhateverParameter
-from Eikthyr.param import TaskParameter
-from Eikthyr.param import TaskListParameter
-from Eikthyr.param import TargetParameter
-from Eikthyr.param import PathParameter
+from . import param
+from .param import WhateverParameter
+from .param import TaskParameter
+from .param import TaskListParameter
+from .param import TargetParameter
+from .param import PathParameter
 from luigi import Parameter
 from luigi import ListParameter
 from luigi import BoolParameter
 from luigi import IntParameter
 from luigi import FloatParameter
 
-from Eikthyr import specialtask
-from Eikthyr.specialtask import InputTask
-from Eikthyr.specialtask import TargetWrapperTask
-from Eikthyr.specialtask import StampTask
+from . import specialtask
+from .specialtask import InputTask
+from .specialtask import TargetWrapperTask
+from .specialtask import StampTask
 
-from Eikthyr import logging
-from Eikthyr.logging import logger
+from . import logging
+from .logging import logger
 
-from Eikthyr import run
-from Eikthyr.run import run
+from . import run
+from .run import run
 
 from luigi import Config
 
