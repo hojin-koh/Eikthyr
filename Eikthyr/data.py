@@ -30,7 +30,7 @@ class ConfigData(lg.Config):
 
 class LocalOverwriteFileSystem(LocalFileSystem):
     def rename_dont_move(self, path, dest):
-        pathDest = path(dest)
+        pathDest = Path(dest)
         if pathDest.is_dir():
             rmtree(dest)
             self.move(path, dest)
