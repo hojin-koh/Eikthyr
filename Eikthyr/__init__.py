@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+from dotenv import load_dotenv
+load_dotenv()
+
 # Deal with luigi's annoying deprecation warning
 import warnings
 with warnings.catch_warnings():
