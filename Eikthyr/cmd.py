@@ -50,7 +50,7 @@ class MixinCmdUtilities(object):
         envOld = {key: os.environ[key] for key in kwargs if key in os.environ}
         os.environ.update(kwargs)
         try:
-            with self.local.env(**kwargs):
+            with local.env(**kwargs):
                 yield
         finally:
             for key, val in kwargs.items():
@@ -62,12 +62,3 @@ class MixinCmdUtilities(object):
     def cmdfmt(self, lst, *args, **kwargs):
         lst = [s.format(*args, **kwargs) for s in lst]
         return local[lst[0]][lst[1:]]
-
-    # Produce plumbum objects
-    @property
-    def cmd(self):
-        return local.cmd
-
-    @property
-    def local(self):
-        return local

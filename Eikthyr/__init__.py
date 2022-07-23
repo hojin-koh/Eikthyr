@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from dotenv import load_dotenv
-load_dotenv()
+from dotenv import load_dotenv as _load_dotenv
+_load_dotenv()
 
 # Deal with luigi's annoying deprecation warning
-import warnings
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore")
+import warnings as _warnings
+with _warnings.catch_warnings():
+    _warnings.simplefilter("ignore")
     import luigi as lg
 
 from . import data
@@ -17,7 +17,7 @@ from . import cmd
 from .cmd import MixinCmdUtilities
 
 from . import task
-from .task import Task as Task
+from .task import Task
 from .task import STask
 
 from . import envcheck
@@ -49,3 +49,5 @@ from .run import run
 
 from luigi import Config
 
+from plumbum import local
+cmd = local.cmd
