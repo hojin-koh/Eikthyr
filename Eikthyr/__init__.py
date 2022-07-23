@@ -10,36 +10,23 @@ with _warnings.catch_warnings():
     import luigi as lg
 
 from . import data
-from .data import Target
-from .data import ConfigData
+from .data import Target, ConfigData
 
 from . import cmd
 from .cmd import chdir, mkcd, withEnv, cmdfmt
 
 from . import task
-from .task import Task
-from .task import STask
+from .task import Task, STask
 
 from . import envcheck
 from .envcheck import EnvCheck
 
 from . import param
-from .param import WhateverParameter
-from .param import TaskParameter
-from .param import TaskListParameter
-from .param import TargetParameter
-from .param import PathParameter
-from luigi import Parameter
-from luigi import BoolParameter
-from luigi import IntParameter
-from luigi import FloatParameter
-from luigi import ListParameter
-from luigi import DictParameter
+from .param import WhateverParameter, TaskParameter, TaskListParameter, TargetParameter, PathParameter
+from luigi import Parameter, BoolParameter, IntParameter, FloatParameter, ListParameter, DictParameter
 
 from . import specialtask
-from .specialtask import InputTask
-from .specialtask import TargetWrapperTask
-from .specialtask import StampTask
+from .specialtask import InputTask, TargetWrapperTask, StampTask
 
 from . import logging
 from .logging import logger
