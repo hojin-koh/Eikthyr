@@ -44,5 +44,7 @@ def run(tasks, print_summary=True, workers=1):
     if print_summary:
         logger.info("Total Time Spent: {:.3f}s".format(time.time() - t0))
         logger.debug(rtn.summary_text)
+    if rtn.status != lg.LuigiStatusCode.SUCCESS and rtn.status != lg.LuigiStatusCode.SUCCESS_WITH_RETRY:
+        raise RuntimeError("Luigi task run failed")
     return rtn
 
