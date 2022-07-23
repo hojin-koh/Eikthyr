@@ -22,16 +22,17 @@ from pathlib import Path
 import luigi as lg
 from luigi.task import flatten
 from colorama import Fore, Style
+from plumbum import FG
 
 from . import cache
-from .cmd import MixinCmdUtilities
+from .cmd import withEnv
 from .data import Target
 from .logging import logger
 
 class ConfigEnviron(lg.Config):
     environ = lg.DictParameter({}, significant=False, positional=False)
 
-class Task(lg.Task, MixinCmdUtilities):
+class Task(lg.Task):
     checkInputHash = True
     checkOutputHash = True
     checkCodeHash = True
@@ -40,6 +41,7 @@ class Task(lg.Task, MixinCmdUtilities):
     ReRunForMeta = False
 
     environ = lg.DictParameter(ConfigEnviron().environ, significant=False, positional=False)
+    logger = logger
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -77,7 +79,7 @@ class Task(lg.Task, MixinCmdUtilities):
         if not hasattr(self, 'timeStart'):
             logger.debug("{}{}Start {}{}".format(Fore.CYAN, Style.BRIGHT, self, Style.RESET_ALL))
             self.timeStart = time.time()
-        with self.env(**self.environ):
+        with withEnv(**self.environ):
             rtn = self.task()
         self.invalidateCache()
         logger.info("End {} in {:.3f}s\n".format(self, time.time() - self.timeStart))
@@ -140,6 +142,11 @@ class Task(lg.Task, MixinCmdUtilities):
                 if not t.exists():
                     return self.writeCache(False)
         return self.writeCache(True)
+
+    # Expected to get a plumbum object
+    def ex(self, chain):
+        self.logger.info("RUN: {}".format(chain))
+        chain & FG
 
 class STask(Task):
     ReRunForMeta = True

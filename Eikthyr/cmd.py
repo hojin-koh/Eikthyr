@@ -16,49 +16,42 @@
 import os
 from contextlib import contextmanager
 from pathlib import Path
-from plumbum import FG, local
+from plumbum import local
 
 from .logging import logger
 
-class MixinCmdUtilities(object):
+# Change directory within a context
+@contextmanager
+def chdir(path):
+    dirCurrent = Path.cwd()
+    os.chdir(path)
+    try:
+        yield path
+    finally:
+        os.chdir(dirCurrent)
 
-    # Expected to get a plumbum object
-    def ex(self, chain):
-        logger.info("RUN: {}".format(chain))
-        chain & FG
+# Mkdir + chdir
+@contextmanager
+def mkcd(path):
+    Path(path).mkdir(parents=True, exist_ok=True)
+    with chdir(path):
+        yield path
 
-    # Change directory within a context
-    @contextmanager
-    def chdir(self, path):
-        dirCurrent = Path.cwd()
-        os.chdir(path)
-        try:
-            yield path
-        finally:
-            os.chdir(dirCurrent)
+# Change environment within a context
+@contextmanager
+def withEnv(**kwargs):
+    envOld = {key: os.environ[key] for key in kwargs if key in os.environ}
+    os.environ.update(kwargs)
+    try:
+        with local.env(**kwargs):
+            yield
+    finally:
+        for key, val in kwargs.items():
+            if key in envOld:
+                os.environ[key] = envOld[key]
+            else:
+                del os.environ[key]
 
-    # Mkdir + chdir
-    @contextmanager
-    def mkcd(self, path):
-        Path(path).mkdir(parents=True, exist_ok=True)
-        with self.chdir(path):
-            yield path
-
-    # Change environment within a context
-    @contextmanager
-    def env(self, **kwargs):
-        envOld = {key: os.environ[key] for key in kwargs if key in os.environ}
-        os.environ.update(kwargs)
-        try:
-            with local.env(**kwargs):
-                yield
-        finally:
-            for key, val in kwargs.items():
-                if key in envOld:
-                    os.environ[key] = envOld[key]
-                else:
-                    del os.environ[key]
-
-    def cmdfmt(self, lst, *args, **kwargs):
-        lst = [s.format(*args, **kwargs) for s in lst]
-        return local[lst[0]][lst[1:]]
+def cmdfmt(lst, *args, **kwargs):
+    lst = [s.format(*args, **kwargs) for s in lst]
+    return local[lst[0]][lst[1:]]

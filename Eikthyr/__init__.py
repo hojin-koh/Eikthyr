@@ -14,7 +14,7 @@ from .data import Target
 from .data import ConfigData
 
 from . import cmd
-from .cmd import MixinCmdUtilities
+from .cmd import chdir, mkcd, withEnv, cmdfmt
 
 from . import task
 from .task import Task
