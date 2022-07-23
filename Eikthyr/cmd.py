@@ -27,10 +27,6 @@ class MixinCmdUtilities(object):
         logger.info("RUN: {}".format(chain))
         chain & FG
 
-    # Just change dir
-    def cd(self, path):
-        os.chdir(path)
-
     # Change directory within a context
     @contextmanager
     def chdir(self, path):
@@ -40,6 +36,13 @@ class MixinCmdUtilities(object):
             yield path
         finally:
             os.chdir(dirCurrent)
+
+    # Mkdir + chdir
+    @contextmanager
+    def mkcd(self, path):
+        Path(path).mkdir(parents=True, exist_ok=True)
+        with self.chdir(path):
+            yield path
 
     # Change environment within a context
     @contextmanager
