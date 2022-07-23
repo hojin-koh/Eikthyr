@@ -16,6 +16,7 @@
 from pathlib import Path
 
 import luigi as lg
+from luigi.task import flatten
 
 from .data import Target
 from .task import Task
@@ -49,7 +50,10 @@ class TaskParameter(lg.Parameter):
         try:
             return x.output().pathRel
         except:
-            return super().serialize(x)
+            try:
+                return ';'.join(sorted([y.pathRel for y in flatten(x.output())]))
+            except:
+                return super().serialize(x)
 
 class TaskListParameter(lg.Parameter):
     def __init__(self, *args, **kwargs):
@@ -64,9 +68,12 @@ class TaskListParameter(lg.Parameter):
 
     def serialize(self, xs):
         try:
-            return ' '.join(sorted([x.output().pathRel for x in xs]))
+            return ';'.join(sorted([x.output().pathRel for x in xs]))
         except:
-            return super().serialize(xs)
+            try:
+                return ';'.join(sorted([y.pathRel for x in xs for y in flatten(x.output())]))
+            except:
+                return super().serialize(xs)
 
 class TargetParameter(lg.Parameter):
     def __init__(self, *args, **kwargs):
