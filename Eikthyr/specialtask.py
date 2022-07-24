@@ -28,6 +28,9 @@ from .task import Task
 class InputTask(Task):
     src = PathParameter()
 
+    def requires(self):
+        return []
+
     def generates(self):
         return Target(self, self.src)
 

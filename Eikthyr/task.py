@@ -28,6 +28,7 @@ from . import cache
 from .cmd import withEnv
 from .data import Target
 from .logging import logger
+from .param import TaskParameter, TaskListParameter
 
 class ConfigEnviron(lg.Config):
     environ = lg.DictParameter({}, significant=False, positional=False)
@@ -40,17 +41,32 @@ class Task(lg.Task):
 
     ReRunForMeta = False
 
+    prev = TaskListParameter((), significant=False, positional=False)
     environ = lg.DictParameter(ConfigEnviron().environ, significant=False, positional=False)
     logger = logger
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if hasattr(self, 'generates'):
-            self.objOutput = self.generates()
-        else:
-            self.objOutput = None
+        self.objOutput = self.generates()
         self._cacheComplete = None
         self._hashSrc = None
+
+    def _requires(self):
+        return flatten(self.requires()) + list(self.prev)
+
+    def requires(self):
+        if hasattr(self, 'src'):
+            return self.src
+        else:
+            return []
+
+    def generates(self):
+        if hasattr(self, 'out'):
+            return Target(self, self.out)
+        elif hasattr(self, 'outPath'):
+            return Target(self, self.outPath)
+        else:
+            return []
 
     def output(self):
         return self.objOutput;

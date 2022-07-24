@@ -19,7 +19,6 @@ import luigi as lg
 from luigi.task import flatten
 
 from .data import Target
-from .task import Task
 
 class WhateverParameter(lg.Parameter):
     def _warn_on_wrong_param_type(self, param_name, param_value):
@@ -40,12 +39,6 @@ class TaskParameter(lg.Parameter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def _warn_on_wrong_param_type(self, param_name, param_value):
-        if self.__class__ != TaskParameter:
-            return
-        if not isinstance(param_value, Task):
-            raise ValueError("parameter {} must be a Eikthyr task, got {} instead".format(param_name, param_value))
-
     def serialize(self, x):
         try:
             return x.output().pathRel
@@ -58,13 +51,6 @@ class TaskParameter(lg.Parameter):
 class TaskListParameter(lg.Parameter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-    def _warn_on_wrong_param_type(self, param_name, param_value):
-        if self.__class__ != TaskListParameter:
-            return
-        for t in param_value:
-            if not isinstance(t, lg.Task):
-                raise ValueError("parameter {} must be a list of Eikthyr task, got {} instead".format(param_name, param_value))
 
     def serialize(self, xs):
         try:
