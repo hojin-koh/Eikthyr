@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Eikthyr"
+version = "0.6.0"
+authors = [
+    { name="Hojin Koh", email="hojin-koh@users.noreply.github.com" },
+]
+description = "An wrapper to provide more utilities and completion checks to the luigi workflow library."
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = ["luigi", "plumbum", "colorama", "logzero", "python-dotenv"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Development Status :: 3 - Alpha",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/hojin-koh/Eikthyr"
+"Bug Tracker" = "https://github.com/hojin-koh/Eikthyr/issues"

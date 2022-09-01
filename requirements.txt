@@ -1,0 +1,11 @@
+luigi
+plumbum
+logzero
+colorama
+python-dotenv
+
+pytest
+hypothesis
+
+twine
+build
