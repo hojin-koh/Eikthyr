@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import json
 from contextlib import contextmanager
 from hashlib import md5
@@ -25,7 +26,7 @@ from luigi.local_target import LocalFileSystem
 from . import cache
 
 class ConfigData(lg.Config):
-    pathMeta = lg.Parameter('.meta')
+    pathMeta = lg.Parameter(os.getenv('EIKTHYR_DIR_META', '.meta'))
 
 class LocalOverwriteFileSystem(LocalFileSystem):
     def rename_dont_move(self, path, dest):

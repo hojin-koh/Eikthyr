@@ -14,6 +14,7 @@
 # limitations under the License.
 
 
+import os
 import re
 from pathlib import Path
 
@@ -58,7 +59,7 @@ class TargetWrapperTask(Task):
 
 # Stamp: if code don't change, no need to re-run
 class StampTask(Task):
-    pathStamp = PathParameter('.stamp', positional=False)
+    pathStamp = PathParameter(os.getenv('EIKTHYR_DIR_STAMP', '.stamp'), positional=False)
 
     # This task doesn't care about the whether the upstream sources changed
     checkInputHash = False
