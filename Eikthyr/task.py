@@ -95,8 +95,8 @@ class Task(lg.Task):
         return self.objOutput;
 
     def run(self):
+        outputToCheck = list(tgt for tgt in flatten(self.output()) if isinstance(tgt, Target))
         if not self.ReRunForMeta:
-            outputToCheck = list(tgt for tgt in flatten(self.output()) if isinstance(tgt, Target))
             if all(Path(tgt.path).exists() for tgt in outputToCheck):
                 for tgt in outputToCheck:
                     if not Path(tgt.pathMeta).exists():
