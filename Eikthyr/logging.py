@@ -15,3 +15,8 @@
 
 from logzero import setup_logger
 logger = setup_logger('Eikthyr')
+
+# Disable annoying config warnings from luigi
+import warnings
+from luigi.parameter import UnconsumedParameterWarning
+warnings.simplefilter("ignore", UnconsumedParameterWarning)
