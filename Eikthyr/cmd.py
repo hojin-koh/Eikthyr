@@ -52,6 +52,11 @@ def withEnv(**kwargs):
             else:
                 del os.environ[key]
 
+# Format a list of commands
 def cmdfmt(lst, *args, **kwargs):
     lst = [s.format(*args, **kwargs) for s in lst]
     return local[lst[0]][lst[1:]]
+
+# Wrapper of os.getenv just for convenience
+def getenv(*args, **kwargs):
+    return os.getenv(*args, **kwargs)

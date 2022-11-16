@@ -14,7 +14,7 @@ from .data import Target, WrapperTarget
 from .data import ConfigData
 
 from . import cmd
-from .cmd import chdir, mkcd, withEnv, cmdfmt
+from .cmd import chdir, mkcd, withEnv, cmdfmt, getenv
 
 from . import task
 from .task import Task, STask, NITask
