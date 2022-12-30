@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pytest import fixture
-from hypothesis import given, example
 import hypothesis.strategies as st
+from hypothesis import given, example
+from pytest import fixture
 
 import Eikthyr.cache as cache
 

@@ -4,7 +4,10 @@ logzero
 colorama
 python-dotenv
 
+-e .
 pytest
+pytest-cov
+pyfakefs
 hypothesis
 
 twine
