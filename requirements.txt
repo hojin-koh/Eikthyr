@@ -12,3 +12,4 @@ hypothesis
 
 twine
 build
+mkdocs
