@@ -37,5 +37,10 @@ from .run import run
 
 from luigi import Config
 
+# Convenient shortcuts from plumbum
 from plumbum import local
 cmd = local.cmd
+
+# Convenient shortcuts from core python
+from pathlib import Path
+import shutil as sh
