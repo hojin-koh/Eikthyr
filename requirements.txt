@@ -9,6 +9,7 @@ pytest
 pytest-cov
 pyfakefs
 hypothesis
+hypothesis-fspaths
 
 twine
 build

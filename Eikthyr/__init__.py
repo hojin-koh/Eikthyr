@@ -9,6 +9,11 @@ with _warnings.catch_warnings():
     _warnings.simplefilter("ignore")
     import luigi as lg
 
+from . import param
+from .param import PathParameter, WhateverParameter, TaskParameter, TaskListParameter
+from luigi import Parameter, BoolParameter, IntParameter, FloatParameter, ListParameter, DictParameter
+
+
 from . import data
 from .data import Target, WrapperTarget
 from .data import ConfigData
@@ -21,10 +26,6 @@ from .task import Task, STask, NITask
 
 from . import envcheck
 from .envcheck import EnvCheck
-
-from . import param
-from .param import WhateverParameter, TaskParameter, TaskListParameter, TargetParameter, PathParameter
-from luigi import Parameter, BoolParameter, IntParameter, FloatParameter, ListParameter, DictParameter
 
 from . import specialtask
 from .specialtask import InputTask, TargetWrapperTask, StampTask
