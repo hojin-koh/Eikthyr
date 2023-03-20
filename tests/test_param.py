@@ -18,7 +18,6 @@ from pathlib import Path
 
 import hypothesis.strategies as st
 from hypothesis import given, example
-from hypothesis_fspaths import fspaths
 from pytest import fixture
 
 import Eikthyr.param
@@ -37,15 +36,15 @@ def test_pathparameterShort(p):
     if len(p) <= 0: return
     t1 = TaskForPath(p)
     pReal, val = getParameterObjAndVal(t1, 'p')
-    assert pReal.serialize(val) == p
+    assert Path(pReal.serialize(val)) == Path(p)
 
     t2 = TaskForPath(Path.cwd() / p)
     pReal, val = getParameterObjAndVal(t2, 'p')
-    assert pReal.serializeShort(val) == p
+    assert Path(pReal.serializeShort(val)) == Path(p)
 
 @given(p=st.text())
 def test_pathparameterRestore(p):
     if len(p) <= 0: return
     t1 = TaskForPath(p)
     pReal, val = getParameterObjAndVal(t1, 'p')
-    assert pReal.serialize(pReal.parse(pReal.serialize(val))) == p
+    assert Path(pReal.serialize(pReal.parse(pReal.serialize(val)))) == Path(p)
