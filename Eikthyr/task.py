@@ -30,12 +30,17 @@ from .target import Target, BinaryTarget
 from .logging import logger
 from .param import TaskParameter, TaskListParameter
 
-class ConfigEnviron(lg.Config):
-    environ = lg.DictParameter({}, significant=False, positional=False)
+def getAllInputTargets(aTask):
+    if len(aTask) == 0: return set()
+    setRslt = set()
+    for t in aTask:
+        setRslt |= set(flatten(t.input()))
+        setRslt |= getAllInputTargets(t._requires())
+    return setRslt
 
 class Task(lg.Task):
     prev = TaskListParameter((), significant=False, positional=False)
-    environ = lg.DictParameter(ConfigEnviron().environ, significant=False, positional=False)
+    environ = lg.DictParameter({}, significant=False, positional=False)
     logger = logger
 
     #def __init__(self, *args, **kwargs):
@@ -106,7 +111,7 @@ class Task(lg.Task):
         Return `True` if all output files exist and their modification time is newer than
         the modification time of any input file. Otherwise, return `False`.
         """
-        aInputs = flatten(self.input())
+        aInputs = list(getAllInputTargets([self]))
         aOutputs = flatten(self.output())
 
         # First, still check the output exists, as in luigi
@@ -124,10 +129,8 @@ class Task(lg.Task):
             return True
 
         # Reaching here, all outputs exist, and both input side and output side has some mtime for comparison
-        for timeOutput in aMtimesOutput:
-            for timeInput in aMtimesInput:
-                if timeInput > timeOutput:
-                    return False
+        if max(aMtimesInput) > min(aMtimesOutput):
+            return False
 
         return True
 
