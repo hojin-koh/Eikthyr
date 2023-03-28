@@ -38,6 +38,13 @@ class Target(lg.LocalTarget):
 
     def __init__(self, path, **kwargs):
         super().__init__(str(path), **kwargs)
+        pathRel = Path(self.path)
+        if pathRel.is_absolute():
+            if pathRel.is_relative_to(Path.cwd()):
+                pathRel = pathRel.relative_to(Path.cwd())
+            else:
+                pathRel = pathRel.relative_to(pathRel.root)
+        self.pathRel = str(pathRel)
 
     def __repr__(self):
         return '{}({})'.format(self.__class__.__name__, self.path)

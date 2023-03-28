@@ -61,13 +61,15 @@ class TaskParameter(WhateverParameter):
         pass # TODO: lg.Task?
 
     def serializeShort(self, x):
-        try:
-            return x.output().pathRel
-        except:
-            try:
-                return ';'.join(sorted([y.pathRel for y in flatten(x.output())]))
-            except:
-                return super().serialize(x)
+        aRepr = []
+        for out in flatten(x.output()):
+            if hasattr(out, 'pathRel'):
+                aRepr.append(out.pathRel)
+            elif hasattr(out, 'path'):
+                aRepr.append(out.path)
+            else:
+                aRepr.append(repr(out))
+        return ';'.join(sorted(aRepr))
 
 # TODO: Test
 class TaskListParameter(WhateverParameter):
@@ -77,10 +79,12 @@ class TaskListParameter(WhateverParameter):
         pass # TODO: lg.Task?
 
     def serializeShort(self, xs):
-        try:
-            return ';'.join(sorted([x.output().pathRel for x in xs]))
-        except:
-            try:
-                return ';'.join(sorted([y.pathRel for x in xs for y in flatten(x.output())]))
-            except:
-                return super().serialize(xs)
+        aRepr = []
+        for out in flatten((x.output() for x in xs)):
+            if hasattr(out, 'pathRel'):
+                aRepr.append(out.pathRel)
+            elif hasattr(out, 'path'):
+                aRepr.append(out.path)
+            else:
+                aRepr.append(repr(out))
+        return ';'.join(sorted(aRepr))
