@@ -21,7 +21,7 @@ from pathlib import Path
 import luigi as lg
 from luigi.task import flatten
 
-from .data import Target
+from .target import Target
 from .logging import logger
 from .param import PathParameter, TargetParameter
 from .task import Task

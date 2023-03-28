@@ -13,10 +13,8 @@ from . import param
 from .param import PathParameter, WhateverParameter, TaskParameter, TaskListParameter
 from luigi import Parameter, BoolParameter, IntParameter, FloatParameter, ListParameter, DictParameter
 
-
-from . import data
-from .data import Target, WrapperTarget
-from .data import ConfigData
+from . import target
+from .target import Target, BinaryTarget
 
 from . import cmd
 from .cmd import chdir, mkcd, withEnv, cmdfmt, getenv

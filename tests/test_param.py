@@ -19,10 +19,10 @@ from pathlib import Path
 import hypothesis.strategies as st
 from hypothesis import given, example
 
-import Eikthyr.param
+from Eikthyr.param import PathParameter
 
 class TaskForPath(lg.Task):
-    p = Eikthyr.param.PathParameter()
+    p = PathParameter()
 
 # Utility function to get the actual Parameter object
 def getParameterObjAndVal(task, name):

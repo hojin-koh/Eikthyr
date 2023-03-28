@@ -20,7 +20,6 @@ import luigi as lg
 from luigi.interface import _WorkerSchedulerFactory
 from luigi import worker
 
-from .cache import startCache
 from .logging import logger
 
 class _EikthyrFactory(_WorkerSchedulerFactory):
@@ -34,8 +33,6 @@ class _EikthyrFactory(_WorkerSchedulerFactory):
                 )
 
 def run(tasks, print_summary=True, workers=1):
-    if workers > 1:
-        startCache()
     if isinstance(tasks, lg.Task):
         tasks = (tasks,)
     t0 = time.time()

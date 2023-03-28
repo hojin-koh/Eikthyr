@@ -24,7 +24,6 @@ from luigi.task import flatten
 from colorama import Fore, Style
 from plumbum import FG
 
-from . import cache
 from .cmd import withEnv
 from .target import Target, BinaryTarget
 from .logging import logger
