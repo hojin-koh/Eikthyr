@@ -22,13 +22,10 @@ from . import cmd
 from .cmd import chdir, mkcd, withEnv, cmdfmt, getenv
 
 from . import task
-from .task import Task, STask, NITask
+from .task import Task
 
 from . import envcheck
 from .envcheck import EnvCheck
-
-from . import specialtask
-from .specialtask import InputTask, TargetWrapperTask, StampTask
 
 from . import logging
 from .logging import logger

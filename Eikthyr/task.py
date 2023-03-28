@@ -26,7 +26,7 @@ from plumbum import FG
 
 from . import cache
 from .cmd import withEnv
-from .data import Target
+from .target import Target, BinaryTarget
 from .logging import logger
 from .param import TaskParameter, TaskListParameter
 
@@ -34,25 +34,13 @@ class ConfigEnviron(lg.Config):
     environ = lg.DictParameter({}, significant=False, positional=False)
 
 class Task(lg.Task):
-    checkInputHash = True
-    checkOutputHash = True
-    simplifiedOutputHash = False # Compute only filenames for a directory
-    checkCodeHash = True
-    checkSignature = True
-
-    ReRunForMeta = False
-    ReRunAfterDeps = False
-
     prev = TaskListParameter((), significant=False, positional=False)
     environ = lg.DictParameter(ConfigEnviron().environ, significant=False, positional=False)
-    canChange = lg.BoolParameter(False, significant=False, positional=False)
     logger = logger
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.objOutput = None
-        self._cacheComplete = None
-        self._hashSrc = None
+    #def __init__(self, *args, **kwargs):
+    #    super().__init__(*args, **kwargs)
+    #    self.objOutput = None
 
     # Mostly copied from the original luigi
     def __repr__(self):
@@ -64,6 +52,7 @@ class Task(lg.Task):
         param_objs = dict(params)
         for param_name, param_value in param_values:
             if param_objs[param_name].significant:
+                # If there is serializeShort we added, use it
                 if hasattr(param_objs[param_name], 'serializeShort'):
                     thisRepr = param_objs[param_name].serializeShort(param_value)
                 else:
@@ -75,142 +64,74 @@ class Task(lg.Task):
     def _requires(self):
         return flatten(self.requires()) + list(self.prev)
 
+    # The default input if there's a parameter called "src"
     def requires(self):
         if hasattr(self, 'src'):
             return self.src
         else:
             return []
 
-    def generates(self):
+    # The default output if there's a parameter called "out" or "outbin"
+    def output(self):
         if hasattr(self, 'out'):
-            return Target(self, self.out)
-        elif hasattr(self, 'outPath'):
-            return Target(self, self.outPath)
+            return Target(self.out)
+        elif hasattr(self, 'outbin'):
+            return BinaryTarget(self.outbin)
         else:
             return []
 
-    def output(self):
-        if self.objOutput == None:
-            self.objOutput = self.generates()
-        return self.objOutput;
+    #def run(self):
+    #    if not hasattr(self, 'timeStart'):
+    #        logger.debug("{}{}Start {}{}".format(Fore.CYAN, Style.BRIGHT, self, Style.RESET_ALL))
+    #        self.timeStart = time.time()
+    #    with withEnv(**self.environ):
+    #        rtn = self.task()
+    #        if isgenerator(rtn):
+    #            yield from rtn
 
-    def run(self):
-        outputToCheck = list(tgt for tgt in flatten(self.output()) if isinstance(tgt, Target))
-        if not self.ReRunForMeta:
-            if all(Path(tgt.path).exists() for tgt in outputToCheck):
-                for tgt in outputToCheck:
-                    if not Path(tgt.pathMeta).exists():
-                        logger.debug("Metadata for {} regenerated".format(tgt.path))
-                        tgt.writeMeta()
-                self.invalidateCache()
-                if not self.ReRunAfterDeps:
-                    if self.complete():
-                        return True
+    #    # After running, generate the remaining missing metadata
+    #    for tgt in outputToCheck:
+    #        if Path(tgt.path).exists():
+    #            if not Path(tgt.pathMeta).exists():
+    #                tgt.writeMeta()
+    #            elif tgt.isOutdated():
+    #                tgt.writeMeta()
 
-        if not hasattr(self, 'timeStart'):
-            logger.debug("{}{}Start {}{}".format(Fore.CYAN, Style.BRIGHT, self, Style.RESET_ALL))
-            self.timeStart = time.time()
-        with withEnv(**self.environ):
-            rtn = self.task()
-            if isgenerator(rtn):
-                yield from rtn
-
-        # After running, generate the remaining missing metadata
-        for tgt in outputToCheck:
-            if Path(tgt.path).exists():
-                if not Path(tgt.pathMeta).exists():
-                    tgt.writeMeta()
-                elif tgt.isOutdated():
-                    tgt.writeMeta()
-
-        self.invalidateCache()
-        logger.info("End {} in {:.3f}s\n".format(self, time.time() - self.timeStart))
-        return rtn
-
-    def task(self):
-        pass
-
-    def getSignature(self):
-        if self.checkSignature:
-            return repr(self)
-        else:
-            return "{}()".format(self.__class__.__name__)
-
-    def getShortStamp(self):
-        return self.__class__.__name__
-
-    def getStamp(self):
-        return "".join(c for c in self.getStampFileName() if c.isalnum())
-
-    def getCode(self):
-        return self.__class__.task
-
-    def getCodeHash(self):
-        if self.checkCodeHash:
-            return md5(pickle.dumps(getsource(self.getCode()), protocol=4), usedforsecurity=False).hexdigest()
-        else:
-            return '0'
-
-    def getSrcHash(self):
-        if self._hashSrc == None:
-            self._hashSrc = []
-            if self.checkInputHash:
-                for tgt in flatten(self.input()):
-                    if not isinstance(tgt, Target): continue
-                    self._hashSrc.append(tgt.getMeta()['gen']['out'])
-                self._hashSrc.sort()
-        return self._hashSrc
-
-    def invalidateCache(self):
-        if cache.isAvailable():
-            rslt = cache.deleteObj(self)
-        else:
-            self._cacheComplete = None
-
-    def writeCache(self, rslt):
-        if cache.isAvailable():
-            cache.putObj(self, rslt)
-        else:
-            self._cacheComplete = rslt
-        return rslt
+    #    self.invalidateCache()
+    #    logger.info("End {} in {:.3f}s\n".format(self, time.time() - self.timeStart))
+    #    return rtn
 
     def complete(self):
-        if cache.isAvailable():
-            rslt = cache.getObj(self)
-            if rslt != None:
-                return rslt
-        elif self._cacheComplete is not None:
-            return self._cacheComplete
+        """
+        Return `True` if all output files exist and their modification time is newer than
+        the modification time of any input file. Otherwise, return `False`.
+        """
+        aInputs = flatten(self.input())
+        aOutputs = flatten(self.output())
 
-        # Check whether the dependencies are fine
-        for tgt in flatten(self.input()):
-            if not isinstance(tgt, Target): continue
-            if not tgt.task.complete():
-                return self.writeCache(False)
+        # First, still check the output exists, as in luigi
+        if not all((output.exists() for output in aOutputs)):
+            return False
 
-        outputs = flatten(self.output())
-        if len(outputs) == 0:
-            return self.writeCache(False)
-        for t in outputs:
-            if isinstance(t, Target):
-                if self.canChange:
-                    if t.isOutdated(reCompute=True):
-                        return self.writeCache(False)
-                else:
-                    if t.isOutdated():
-                        return self.writeCache(False)
-            else:
-                if not t.exists():
-                    return self.writeCache(False)
-        return self.writeCache(True)
+        # Collect the list of mtime from outputs. If none can be checked, then just assume they're okay
+        aMtimesOutput = [output.mtime() for output in aOutputs if hasattr(output, 'mtime')]
+        if len(aMtimesOutput) == 0:
+            return True
+
+        # Collect the list of mtime from inputs. If none can be checked, then just assume they're okay
+        aMtimesInput = [obj.mtime() for obj in aInputs if hasattr(obj, 'mtime')]
+        if len(aMtimesInput) == 0:
+            return True
+
+        # Reaching here, all outputs exist, and both input side and output side has some mtime for comparison
+        for timeOutput in aMtimesOutput:
+            for timeInput in aMtimesInput:
+                if timeInput > timeOutput:
+                    return False
+
+        return True
 
     # Expected to get a plumbum object
     def ex(self, chain):
         self.logger.info("RUN: {}".format(chain))
         chain & FG
-
-class STask(Task):
-    ReRunForMeta = True
-
-class NITask(Task):
-    ReRunAfterDeps = True

@@ -18,7 +18,6 @@ from pathlib import Path
 
 import hypothesis.strategies as st
 from hypothesis import given, example
-from pytest import fixture
 
 import Eikthyr.param
 

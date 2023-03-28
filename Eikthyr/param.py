@@ -20,8 +20,6 @@ from pathlib import Path
 import luigi as lg
 from luigi.task import flatten
 
-from .data import Target
-
 class PathParameter(lg.PathParameter):
     """An extended type of PathParameter from the luigi one.
 
@@ -42,6 +40,7 @@ class WhateverParameter(lg.Parameter):
 
     When serialize/deserialize, this class pickle all its contents.
     """
+
     def _warn_on_wrong_param_type(self, param_name, param_value):
         return
 
@@ -57,6 +56,7 @@ class WhateverParameter(lg.Parameter):
 # TODO: Test
 class TaskParameter(WhateverParameter):
     """A task, presumed to be pulled in as a dependency."""
+
     def _warn_on_wrong_param_type(self, param_name, param_value):
         pass # TODO: lg.Task?
 
@@ -72,6 +72,10 @@ class TaskParameter(WhateverParameter):
 # TODO: Test
 class TaskListParameter(WhateverParameter):
     """A list of tasks, presumed to be pulled in as dependencies."""
+
+    def _warn_on_wrong_param_type(self, param_name, param_value):
+        pass # TODO: lg.Task?
+
     def serializeShort(self, xs):
         try:
             return ';'.join(sorted([x.output().pathRel for x in xs]))
@@ -80,17 +84,3 @@ class TaskListParameter(WhateverParameter):
                 return ';'.join(sorted([y.pathRel for x in xs for y in flatten(x.output())]))
             except:
                 return super().serialize(xs)
-
-# TODO: delete this?
-class TargetParameter(WhateverParameter):
-    def _warn_on_wrong_param_type(self, param_name, param_value):
-        if self.__class__ != TargetParameter:
-            return
-        if not isinstance(param_value, Target):
-            raise ValueError("parameter {} must be a Eikthyr target, got {} instead".format(param_name, param_value))
-
-    def serializeShort(self, x):
-        try:
-            return x.pathRel
-        except:
-            return super().serialize(x)

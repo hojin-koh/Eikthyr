@@ -47,4 +47,3 @@ def run(tasks, print_summary=True, workers=1):
     if rtn.status != lg.LuigiStatusCode.SUCCESS and rtn.status != lg.LuigiStatusCode.SUCCESS_WITH_RETRY:
         raise RuntimeError("Luigi task run failed")
     return rtn
-

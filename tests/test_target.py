@@ -13,31 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import luigi as lg
 import os
 import time
 from pathlib import Path
-from contextlib import contextmanager
-from shutil import rmtree
 
 import hypothesis.strategies as st
 from hypothesis import given, example
-from pyfakefs.pytest_plugin import Patcher
-from pytest import fixture
+from .common import TestFieldForFile
 
 from Eikthyr.target import Target, BinaryTarget
-
-@contextmanager
-def TestFieldForFile():
-    dirCurrent = Path.cwd()
-    p = "temp_dir_test_output"
-    Path(p).mkdir(parents=True, exist_ok=True)
-    os.chdir(p)
-    try:
-        yield p
-    finally:
-        os.chdir(dirCurrent)
-        rmtree(p)
 
 @given(content=st.text())
 def test_writeTextFile(content):
