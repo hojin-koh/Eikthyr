@@ -42,6 +42,13 @@ class Target(lg.LocalTarget):
     def __repr__(self):
         return '{}({})'.format(self.__class__.__name__, self.path)
 
+    def mtime(self):
+        '''
+        Get the last modification time of this target.
+        The file/dir modification time is used here.
+        '''
+        return os.path.getmtime(self.path)
+
     @contextmanager
     def pathWrite(self):
         self.makedirs()

@@ -15,6 +15,7 @@
 
 import luigi as lg
 import os
+import time
 from pathlib import Path
 from contextlib import contextmanager
 from shutil import rmtree
@@ -73,3 +74,20 @@ def test_writeDir(content):
             (Path(fw) / p).write_bytes(content)
 
         assert Path("000/999").read_bytes() == content
+
+def test_mtime():
+    with TestFieldForFile() as _:
+        tgt = Target("000")
+        with tgt.fpWrite() as fpw:
+            fpw.write("123")
+        time.sleep(0.01)  # Ensure there's a measurable time difference between writes
+        mtimeInitial = os.path.getmtime(tgt.path)
+
+        with tgt.fpWrite() as fpw:
+            fpw.write("456")
+        time.sleep(0.01)  # Ensure there's a measurable time difference between writes
+        mtimeUpdated = os.path.getmtime(tgt.path)
+
+        # Check mtime method matches file modification time
+        assert tgt.mtime() == mtimeUpdated
+        assert tgt.mtime() != mtimeInitial
