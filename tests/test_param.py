@@ -13,13 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import luigi as lg
 from pathlib import Path
 
 import hypothesis.strategies as st
 from hypothesis import given, example
 
 from Eikthyr.param import PathParameter
+import luigi as lg
 
 class TaskForPath(lg.Task):
     p = PathParameter()

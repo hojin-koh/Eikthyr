@@ -20,7 +20,8 @@ from . import cmd
 from .cmd import chdir, mkcd, withEnv, cmdfmt, getenv
 
 from . import task
-from .task import Task
+from .task import BaseTask, Task
+from .specialtask import InputTask
 
 from . import envcheck
 from .envcheck import EnvCheck

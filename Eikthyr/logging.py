@@ -20,3 +20,8 @@ logger = setup_logger('Eikthyr')
 import warnings
 from luigi.parameter import UnconsumedParameterWarning
 warnings.simplefilter("ignore", UnconsumedParameterWarning)
+
+# Deal with luigi's annoying deprecation warning
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    import luigi

@@ -15,8 +15,7 @@
 
 import time
 import pickle
-from hashlib import md5
-from inspect import getsource, isgenerator
+from inspect import isgenerator
 from pathlib import Path
 
 import luigi as lg
@@ -37,7 +36,7 @@ def getAllInputTargets(aTask):
         setRslt |= getAllInputTargets(t._requires())
     return setRslt
 
-class Task(lg.Task):
+class BaseTask(lg.Task):
     prev = TaskListParameter((), significant=False, positional=False)
     environ = lg.DictParameter({}, significant=False, positional=False)
     logger = logger
@@ -137,3 +136,14 @@ class Task(lg.Task):
     def ex(self, chain):
         self.logger.info("RUN: {}".format(chain))
         chain & FG
+
+class Task(BaseTask):
+    pass
+
+@Task.event_handler(lg.Event.START)
+def logTaskStart(task):
+    logger.debug("{}{}Start {}{}".format(Fore.CYAN, Style.BRIGHT, task, Style.RESET_ALL))
+
+@Task.event_handler(lg.Event.PROCESSING_TIME)
+def logTaskStart(task, t):
+    logger.info("{}{}Done {} in {:.1f}s{}\n".format(Fore.GREEN, Style.BRIGHT, task, t, Style.RESET_ALL))

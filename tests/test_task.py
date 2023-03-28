@@ -13,11 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import luigi as lg
 import os
 from datetime import timedelta
-from luigi.interface import _WorkerSchedulerFactory
-from luigi import worker
 from pathlib import Path
 
 from pytest import fixture
@@ -25,6 +22,9 @@ from .common import TestFieldForFile
 
 from Eikthyr.task import Task
 from Eikthyr.param import PathParameter, TaskParameter
+
+# Put all luigi imports after Eikthyr to suppress annoying warnings
+import luigi as lg
 
 aSideEffects = []
 
@@ -64,22 +64,11 @@ def getStdTaskChain():
     tC = TaskC(tB, 'c.txt')
     return tA, tB, tC
 
-class TestFactory(_WorkerSchedulerFactory):
-    def create_worker(self, scheduler, worker_processes, assistant=False):
-        # Based on the suggestions in https://github.com/spotify/luigi/issues/2992
-        return worker.Worker(scheduler=scheduler, worker_processes=worker_processes, assistant=assistant,
-                cache_task_completion=True,
-                check_complete_on_run=True,
-                check_unfulfilled_deps=False,
-                keep_alive=True,
-                max_keep_alive_idle_duration=timedelta(seconds=1)
-                )
-
 def test_canTaskRun():
     aSideEffects.clear()
     with TestFieldForFile() as _:
         tA, tB, tC = getStdTaskChain()
-        lg.build([tA, tB, tC,], local_scheduler=True, log_level='WARNING', workers=1, worker_scheduler_factory=TestFactory())
+        lg.build([tA, tB, tC,], local_scheduler=True, log_level='WARNING', workers=1)
 
         with open('a.txt', 'r') as fp:
             assert fp.read() == "Hello"
@@ -96,9 +85,9 @@ def test_canTaskReRunMtime1():
     aSideEffects.clear()
     with TestFieldForFile() as _:
         tA, tB, tC = getStdTaskChain()
-        lg.build([tA, tB, tC,], local_scheduler=True, log_level='WARNING', workers=1, worker_scheduler_factory=TestFactory())
+        lg.build([tA, tB, tC,], local_scheduler=True, log_level='WARNING', workers=1)
         Path('b.txt').touch()
-        lg.build([tA, tB, tC,], local_scheduler=True, log_level='WARNING', workers=1, worker_scheduler_factory=TestFactory())
+        lg.build([tA, tB, tC,], local_scheduler=True, log_level='WARNING', workers=1)
 
         assert aSideEffects == ['TaskA.run', 'TaskB.run', 'TaskC.run', 'TaskC.run']
 
@@ -106,8 +95,8 @@ def test_canTaskReRunMtime2():
     aSideEffects.clear()
     with TestFieldForFile() as _:
         tA, tB, tC = getStdTaskChain()
-        lg.build([tA, tB, tC,], local_scheduler=True, log_level='WARNING', workers=1, worker_scheduler_factory=TestFactory())
+        lg.build([tA, tB, tC,], local_scheduler=True, log_level='WARNING', workers=1)
         Path('a.txt').touch()
-        lg.build([tA, tB, tC,], local_scheduler=True, log_level='WARNING', workers=1, worker_scheduler_factory=TestFactory())
+        lg.build([tA, tB, tC,], local_scheduler=True, log_level='WARNING', workers=1)
 
         assert aSideEffects == ['TaskA.run', 'TaskB.run', 'TaskC.run', 'TaskB.run', 'TaskC.run']
