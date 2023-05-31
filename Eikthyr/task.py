@@ -38,7 +38,6 @@ def getAllInputTargets(aTask):
 
 class BaseTask(lg.Task):
     prev = TaskListParameter((), significant=False, positional=False)
-    environ = lg.DictParameter({}, significant=False, positional=False)
     logger = logger
 
     #def __init__(self, *args, **kwargs):
@@ -82,27 +81,6 @@ class BaseTask(lg.Task):
             return BinaryTarget(self.outbin)
         else:
             return []
-
-    #def run(self):
-    #    if not hasattr(self, 'timeStart'):
-    #        logger.debug("{}{}Start {}{}".format(Fore.CYAN, Style.BRIGHT, self, Style.RESET_ALL))
-    #        self.timeStart = time.time()
-    #    with withEnv(**self.environ):
-    #        rtn = self.task()
-    #        if isgenerator(rtn):
-    #            yield from rtn
-
-    #    # After running, generate the remaining missing metadata
-    #    for tgt in outputToCheck:
-    #        if Path(tgt.path).exists():
-    #            if not Path(tgt.pathMeta).exists():
-    #                tgt.writeMeta()
-    #            elif tgt.isOutdated():
-    #                tgt.writeMeta()
-
-    #    self.invalidateCache()
-    #    logger.info("End {} in {:.3f}s\n".format(self, time.time() - self.timeStart))
-    #    return rtn
 
     def complete(self):
         """
